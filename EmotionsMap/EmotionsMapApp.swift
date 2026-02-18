@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct EmotionsMapApp: App {
+    @StateObject private var store = ReportStore()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack {
+                HomeView()
+            }
+            .environmentObject(store)
         }
     }
 }

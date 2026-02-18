@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		82B6D76A2F44833300B2387A /* EmotionsMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EmotionsMap.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		82B6D76A2F44833300B2387A /* EmotionsMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = EmotionsMap.app; path = "/Users/riccardopuggioni/Desktop/EmotionsMap/build/Debug-iphoneos/EmotionsMap.app"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,16 +33,7 @@
 			isa = PBXGroup;
 			children = (
 				82B6D76C2F44833300B2387A /* EmotionsMap */,
-				82B6D76B2F44833300B2387A /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		82B6D76B2F44833300B2387A /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				82B6D76A2F44833300B2387A /* EmotionsMap.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -95,7 +86,7 @@
 			mainGroup = 82B6D7612F44833200B2387A;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 82B6D76B2F44833300B2387A /* Products */;
+			productRefGroup = 82B6D7612F44833200B2387A;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
