@@ -14,7 +14,7 @@ struct EmotionsMapApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                HomeView()
+                IMImmersiveHomeView()
             }
             .environmentObject(store)
         }

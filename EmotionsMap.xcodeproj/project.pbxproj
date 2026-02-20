@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		82B6D76A2F44833300B2387A /* EmotionsMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = EmotionsMap.app; path = "/Users/riccardopuggioni/Desktop/EmotionsMap/build/Debug-iphoneos/EmotionsMap.app"; sourceTree = "<absolute>"; };
+		82BB2A632F4852A4001223DC /* EmotionsMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EmotionsMap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,6 +33,7 @@
 			isa = PBXGroup;
 			children = (
 				82B6D76C2F44833300B2387A /* EmotionsMap */,
+				82BB2A632F4852A4001223DC /* EmotionsMap.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,7 +59,7 @@
 			packageProductDependencies = (
 			);
 			productName = EmotionsMap;
-			productReference = 82B6D76A2F44833300B2387A /* EmotionsMap.app */;
+			productReference = 82BB2A632F4852A4001223DC /* EmotionsMap.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
