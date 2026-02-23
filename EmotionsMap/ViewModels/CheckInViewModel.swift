@@ -14,8 +14,13 @@ final class CheckInViewModel: ObservableObject {
     @Published var x: Double = 0.5
     @Published var y: Double = 0.5
 
+    /// The specific emotion name selected in EmotionDetailView
+    @Published var specificEmotion: String? = nil
+
     @Published var triggerText: String = ""
     @Published var isTriggerHidden: Bool = false
+    /// Filename of a saved voice memo, if the user chose to record
+    @Published var audioFileName: String? = nil
 
     var moodLabel: String {
         // mapping semplice (puoi raffinarlo)
@@ -35,8 +40,10 @@ final class CheckInViewModel: ObservableObject {
             x: x,
             y: y,
             moodLabel: moodLabel,
+            specificEmotion: specificEmotion,
             triggerText: triggerText.trimmingCharacters(in: .whitespacesAndNewlines),
-            isTriggerHidden: isTriggerHidden
+            isTriggerHidden: isTriggerHidden,
+            audioFileName: audioFileName
         )
     }
 

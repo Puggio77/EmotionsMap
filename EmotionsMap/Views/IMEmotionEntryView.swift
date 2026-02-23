@@ -35,3 +35,9 @@ struct IMEmotionEntryView: View {
         .navigationTitle("New Entry")
     }
 }
+
+#Preview {
+    NavigationStack {
+        IMEmotionEntryView()
+    }
+}

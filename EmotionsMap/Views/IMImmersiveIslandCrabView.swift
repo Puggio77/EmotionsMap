@@ -82,3 +82,12 @@ private extension Entity {
         children.forEach { $0.visit(block) }
     }
 }
+
+#Preview {
+    if #available(iOS 17.0, *) {
+        IMImmersiveIslandCrabView(onWake: {})
+    } else {
+        Color.black.ignoresSafeArea()
+            .overlay(Text("Requires iOS 17+").foregroundStyle(.white))
+    }
+}

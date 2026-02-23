@@ -5,12 +5,13 @@
 //  Created by Riccardo Puggioni on 20/02/26.
 //
 
-
 import SwiftUI
 import Combine
+
 struct IMImmersiveHomeView: View {
 
     @StateObject private var flow = IMFlowState()
+    @EnvironmentObject private var router: AppRouter
 
     var body: some View {
         ZStack {
@@ -45,24 +46,17 @@ struct IMImmersiveHomeView: View {
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
-
-            NavigationLink(
-                destination: IMEmotionEntryView(),
-                isActive: Binding(
-                    get: { flow.step == IMFlowState.Step.goToRecord },
-                    set: { _ in }
-                )
-            ) { EmptyView() }
-
-            NavigationLink(
-                destination: IMPastReflectionsView(),
-                isActive: Binding(
-                    get: { flow.step == IMFlowState.Step.goToHistory },
-                    set: { _ in }
-                )
-            ) { EmptyView() }
         }
         .navigationBarHidden(true)
+        // Reset flow to sleeping when returning home via router.popToRoot()
+        .onChange(of: router.shouldResetHomeFlow) { _, triggered in
+            if triggered {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    flow.step = .sleeping
+                }
+                router.shouldResetHomeFlow = false
+            }
+        }
     }
 
     @ViewBuilder
@@ -71,8 +65,8 @@ struct IMImmersiveHomeView: View {
 
         case .askFeeling:
             VStack(spacing: 12) {
-                Button("I’d like to share") {
-                    flow.chooseRecord()
+                Button("I'd like to share") {
+                    router.startCheckIn()
                 }
                 .buttonStyle(.borderedProminent)
 
@@ -85,12 +79,12 @@ struct IMImmersiveHomeView: View {
         case .askReflect:
             VStack(spacing: 12) {
                 Button("Yes, show me") {
-                    flow.chooseHistory()
+                    router.openArchive()
                 }
                 .buttonStyle(.borderedProminent)
 
-                Button("No, I’d rather share something new") {
-                    flow.chooseRecord()
+                Button("No, I'd rather share something new") {
+                    router.startCheckIn()
                 }
                 .buttonStyle(.bordered)
             }
@@ -98,5 +92,13 @@ struct IMImmersiveHomeView: View {
         default:
             EmptyView()
         }
+    }
+}
+
+#Preview {
+    NavigationStack {
+        IMImmersiveHomeView()
+            .environmentObject(ReportStore())
+            .environmentObject(AppRouter())
     }
 }
