@@ -41,5 +41,8 @@ struct ReportsListView: View {
 }
 
 #Preview {
-    ReportsListView()
+    NavigationStack {
+        ReportsListView()
+            .environmentObject(ReportStore())
+    }
 }
