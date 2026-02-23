@@ -56,8 +56,9 @@ class SpecificEmotion {
     var shellType: String
     var basicEmotion: BasicEmotion
     
-    init(name: String = "Respected", basicEmotion: BasicEmotion = .happy) {
+    init(name: String = "Respected", shellType: String = "None", basicEmotion: BasicEmotion = .happy) {
         self.name = name
+        self.shellType = shellType
         self.basicEmotion = basicEmotion
     }
 }
