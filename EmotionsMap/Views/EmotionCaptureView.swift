@@ -29,6 +29,11 @@ struct EmotionCaptureView: View {
     // Derived from router.vm (set by EmotionDetailView)
     private var emotionName: String  { router.vm.specificEmotion ?? router.vm.moodLabel }
     private var quadrantName: String { router.vm.moodLabel }
+    
+    private var shellName: String {
+        let index = abs(emotionName.hashValue) % 5 + 1
+        return "shell_\(index)"
+    }
 
     private var canSave: Bool {
         switch captureMode {
@@ -39,48 +44,90 @@ struct EmotionCaptureView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 28) {
-
-                // ── Emotion hero ─────────────────────────────────────
-                emotionHero
-
-                // ── Mode choice or active panel ──────────────────────
-                if captureMode == nil {
-                    modeChoice
-                } else if captureMode == .audio {
-                    audioPanel
-                } else {
-                    textPanel
+        ZStack {
+            // Background
+            Color(red: 0.45, green: 0.78, blue: 0.72).ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Header
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("reflect on your moment")
+                        .font(.title2.weight(.bold))
+                        .foregroundColor(.white)
+                    Text("it's you and the shell, remember forever\nwhat are your feelings")
+                        .font(.headline.weight(.medium))
+                        .foregroundColor(.white)
                 }
-
-                // ── Save ─────────────────────────────────────────────
-                if captureMode != nil {
-                    VStack(spacing: 12) {
-
-                        Button {
-                            commitAndSave()
-                        } label: {
-                            Text("Save & see archive")
-                                .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+                
+                ScrollView {
+                    VStack(spacing: 30) {
+                        // Shell & Emotion labels
+                        VStack(spacing: 20) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                    .fill(Color(red: 0.3, green: 0.3, blue: 0.3)) // Dark grey square like in mockup
+                                    .frame(width: 200, height: 200)
+                                    .shadow(color: .black.opacity(0.15), radius: 10, y: 5)
+                                
+                                Image(shellName)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 150, height: 150)
+                            }
+                            
+                            VStack(alignment: .center, spacing: 4) {
+                                Text(emotionName.lowercased())
+                                    .font(.title2.weight(.bold))
+                                    .foregroundColor(.white)
+                                Text(quadrantName.lowercased())
+                                    .font(.headline.weight(.medium))
+                                    .foregroundColor(.white)
+                            }
                         }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(!canSave)
-
-                        Button("Change method") {
-                            if recorder.isRecording { recorder.stop() }
-                            withAnimation { captureMode = nil }
+                        .padding(.top, 40)
+                        
+                        // Mode Choice or Active Panel
+                        if captureMode == nil {
+                            modeChoice
+                        } else if captureMode == .audio {
+                            audioPanel
+                        } else {
+                            textPanel
                         }
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        
+                        // Save Panel
+                        if captureMode != nil {
+                            VStack(spacing: 12) {
+                                Button {
+                                    commitAndSave()
+                                } label: {
+                                    Text("Save & see archive")
+                                        .frame(maxWidth: .infinity)
+                                        .foregroundColor(Color(red: 0.45, green: 0.78, blue: 0.72))
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.white)
+                                .disabled(!canSave)
+
+                                Button("Change method") {
+                                    if recorder.isRecording { recorder.stop() }
+                                    withAnimation { captureMode = nil }
+                                }
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(.white)
+                            }
+                            .padding(.horizontal, 24)
+                            .padding(.top, 20)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                        }
                     }
-                    .padding(.horizontal)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .padding(.bottom, 40)
                 }
             }
-            .padding(.vertical, 24)
         }
-        .navigationTitle("Capture")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { recorder.requestPermissions() }
         .onDisappear { if recorder.isRecording { recorder.stop() } }
@@ -98,74 +145,54 @@ struct EmotionCaptureView: View {
         }
     }
 
-    // MARK: – Emotion hero
-
-    private var emotionHero: some View {
-        VStack(spacing: 12) {
-            Text(emotionName)
-                .font(.system(size: 40, weight: .bold, design: .rounded))
-                .multilineTextAlignment(.center)
-
-            Text(quadrantName)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 6)
-                .background(.thinMaterial)
-                .clipShape(Capsule())
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal)
-    }
-
     // MARK: – Mode choice
 
     private var modeChoice: some View {
-        VStack(spacing: 16) {
-            Text("How would you like to capture this feeling?")
-                .font(.headline)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal)
-
-            HStack(spacing: 14) {
-                // Record
-                Button {
-                    withAnimation { captureMode = .audio }
-                } label: {
-                    VStack(spacing: 12) {
-                        Image(systemName: "mic.fill")
-                            .font(.system(size: 36))
-                        Text("Record\nvoice")
-                            .font(.subheadline.weight(.semibold))
-                            .multilineTextAlignment(.center)
+        HStack(spacing: 50) {
+            // Record
+            Button {
+                withAnimation { captureMode = .audio }
+            } label: {
+                VStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color(red: 0.35, green: 0.68, blue: 0.62))
+                            .frame(width: 90, height: 90)
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 30))
+                            .foregroundColor(Color(red: 0.1, green: 0.4, blue: 0.9)) // blue icon
                     }
-                    .frame(maxWidth: .infinity, minHeight: 120)
-                    .background(.thinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    Text("record\nby voice")
+                        .font(.headline.weight(.medium))
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
                 }
-                .buttonStyle(.plain)
-
-                // Write
-                Button {
-                    withAnimation { captureMode = .text }
-                } label: {
-                    VStack(spacing: 12) {
-                        Image(systemName: "pencil.line")
-                            .font(.system(size: 36))
-                        Text("Write it\ndown")
-                            .font(.subheadline.weight(.semibold))
-                            .multilineTextAlignment(.center)
-                    }
-                    .frame(maxWidth: .infinity, minHeight: 120)
-                    .background(.thinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                }
-                .buttonStyle(.plain)
             }
-            .padding(.horizontal)
+            .buttonStyle(.plain)
+
+            // Write
+            Button {
+                withAnimation { captureMode = .text }
+            } label: {
+                VStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color(red: 0.35, green: 0.68, blue: 0.62))
+                            .frame(width: 90, height: 90)
+                        Image(systemName: "pencil")
+                            .font(.system(size: 30))
+                            .foregroundColor(Color(red: 0.1, green: 0.4, blue: 0.9)) // blue icon
+                    }
+                    Text("start\nwriting")
+                        .font(.headline.weight(.medium))
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                }
+            }
+            .buttonStyle(.plain)
         }
         .transition(.opacity.combined(with: .scale(scale: 0.96)))
+        .padding(.top, 20)
     }
 
     // MARK: – Audio panel
@@ -176,9 +203,9 @@ struct EmotionCaptureView: View {
             // Status
             Text(recorder.isRecording
                  ? "Recording — \(recorder.formattedDuration)"
-                 : recorder.savedFileName != nil ? "Recording saved ✓" : "Tap to start")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(recorder.isRecording ? .red : .secondary)
+                 : recorder.savedFileName != nil ? "Recording saved ✓" : "Tap the mic to start")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(recorder.isRecording ? .red : .white)
 
             // Mic button
             Button {
@@ -192,14 +219,14 @@ struct EmotionCaptureView: View {
                 ZStack {
                     Circle()
                         .fill(recorder.isRecording
-                              ? Color.red.opacity(0.12)
-                              : Color.accentColor.opacity(0.10))
-                        .frame(width: 96, height: 96)
+                              ? Color.red.opacity(0.15)
+                              : Color.white.opacity(0.2))
+                        .frame(width: 100, height: 100)
 
                     if recorder.isRecording {
                         Circle()
-                            .stroke(Color.red.opacity(0.25), lineWidth: 2)
-                            .frame(width: 96, height: 96)
+                            .stroke(Color.red.opacity(0.5), lineWidth: 2)
+                            .frame(width: 100, height: 100)
                             .scaleEffect(1.18)
                             .animation(
                                 .easeInOut(duration: 0.9).repeatForever(autoreverses: true),
@@ -208,8 +235,8 @@ struct EmotionCaptureView: View {
                     }
 
                     Image(systemName: recorder.isRecording ? "stop.fill" : "mic.fill")
-                        .font(.system(size: 38))
-                        .foregroundStyle(recorder.isRecording ? .red : Color.accentColor)
+                        .font(.system(size: 40))
+                        .foregroundStyle(recorder.isRecording ? .red : .white)
                 }
             }
             .buttonStyle(.plain)
@@ -218,8 +245,9 @@ struct EmotionCaptureView: View {
             if let _ = recorder.savedFileName {
                 HStack(spacing: 10) {
                     Image(systemName: "waveform")
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(.white)
                     Text("Voice memo — \(recorder.formattedDuration)")
+                        .foregroundColor(.white)
                     Spacer()
                     Button {
                         recorder.savedFileName = nil
@@ -230,9 +258,9 @@ struct EmotionCaptureView: View {
                     }
                 }
                 .padding()
-                .background(.thinMaterial)
+                .background(Color.white.opacity(0.2))
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .padding(.horizontal)
+                .padding(.horizontal, 24)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
 
@@ -240,6 +268,7 @@ struct EmotionCaptureView: View {
                 Text(err).font(.caption).foregroundStyle(.red)
             }
         }
+        .padding(.top, 20)
         .transition(.opacity.combined(with: .move(edge: .bottom)))
     }
 
@@ -248,16 +277,19 @@ struct EmotionCaptureView: View {
     private var textPanel: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("What's on your mind?")
-                .font(.subheadline.weight(.semibold))
-                .padding(.horizontal)
+                .font(.headline.weight(.bold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
 
             TextEditor(text: $noteText)
-                .frame(minHeight: 160)
+                .frame(minHeight: 180)
                 .padding(12)
-                .background(.thinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .padding(.horizontal)
+                .background(Color.white.opacity(0.9))
+                .cornerRadius(16)
+                .padding(.horizontal, 24)
+                .scrollContentBackground(.hidden)
         }
+        .padding(.top, 20)
         .transition(.opacity.combined(with: .move(edge: .bottom)))
     }
 

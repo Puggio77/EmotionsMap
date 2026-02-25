@@ -10,8 +10,7 @@ import SwiftData
 
 @main
 struct EmotionsMapApp: App {
-    @StateObject private var store = ReportStore()
-    
+
     let container: ModelContainer = {
         let schema = Schema([
             SubEmotion.self,
@@ -28,10 +27,7 @@ struct EmotionsMapApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                IMImmersiveHomeView()
-            }
-            .environmentObject(store)
+            ContentView()
             .modelContainer(container)
             .task {
                 await MainActor.run {

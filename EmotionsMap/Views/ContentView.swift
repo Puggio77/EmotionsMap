@@ -12,9 +12,11 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack(path: $router.path) {
-            IMImmersiveHomeView()
+            HomeView()
                 .navigationDestination(for: AppRoute.self) { route in
                     switch route {
+                    case .mapIsland:
+                        EmotionMapIslandView()
                     case .emotionSpectrum:
                         EmotionSpectrumView()
                     case .emotionDetail:
@@ -22,7 +24,7 @@ struct ContentView: View {
                     case .emotionCapture:
                         EmotionCaptureView()
                     case .archive:
-                        IMPastReflectionsView()
+                        PastReflectionsView()
                     }
                 }
         }
