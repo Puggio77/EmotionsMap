@@ -46,7 +46,12 @@ struct PastReflectionsView: View {
                     ScrollView {
                         VStack(spacing: 16) {
                             ForEach(store.reports) { report in
-                                ReflectionRow(report: report)
+                                NavigationLink {
+                                    ReportDetailView(report: report)
+                                } label: {
+                                    ReflectionRow(report: report)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                         .padding(.horizontal, 24)
