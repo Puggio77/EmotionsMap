@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 // First layer of Plutchik’s Wheel of Emotions
-enum BasicEmotion: String, CaseIterable, Identifiable {
+enum BasicEmotion: String, Codable, CaseIterable, Identifiable {
     
     case happy = "Happy"
     case sad = "Sad"

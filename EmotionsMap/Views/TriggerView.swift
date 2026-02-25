@@ -87,7 +87,7 @@ struct TriggerView: View {
                 .disabled(!canSave)
 
                 NavigationLink("", isActive: $goToArchive) {
-                    IMPastReflectionsView()
+                    PastReflectionsView()
                 }
                 .hidden()
             }

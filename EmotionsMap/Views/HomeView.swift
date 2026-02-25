@@ -1,48 +1,65 @@
 //
-//  IMImmersiveHomeView.swift
+//  HomeView.swift
 //  EmotionsMap
 //
-//  Created by Riccardo Puggioni on 20/02/26.
+//  Created by Riccardo on 2026.
 //
 
 import SwiftUI
-import Combine
 
-struct IMImmersiveHomeView: View {
-
-    @StateObject private var flow = IMFlowState()
+struct HomeView: View {
+    @StateObject private var flow = HomeFlowState()
     @EnvironmentObject private var router: AppRouter
-
+    
+    // Track whether the crab is open or closed
+    @State private var isCrabOpen = false
+    
     var body: some View {
         ZStack {
-
-            if #available(iOS 17.0, *) {
-                IMImmersiveIslandCrabView {
-                    if flow.step == IMFlowState.Step.sleeping {
-                        withAnimation(.easeInOut(duration: 0.25)) {
+            // Background Image
+            Image(isCrabOpen ? "hermit_crab_open" : "hermit_crab_closed")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+                .onTapGesture {
+                    if !isCrabOpen {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isCrabOpen = true
                             flow.wakeUp()
                         }
                     }
                 }
-            } else {
-                Color.black.ignoresSafeArea()
+            
+            // Instruction prompt if sleeping
+            if flow.step == .sleeping && !isCrabOpen {
+                VStack {
+                    Spacer()
+                    Text("Tap the shell to wake up the hermit crab")
+                        .font(.headline)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .padding(.bottom, 60)
+                }
             }
-
-            if flow.step != IMFlowState.Step.sleeping {
+            
+            // Interaction UI after crab is open
+            if flow.step != .sleeping && isCrabOpen {
                 VStack {
                     Spacer()
                     VStack(spacing: 18) {
                         Text(flow.message)
                             .multilineTextAlignment(.center)
                             .font(.title3)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(.primary)
 
                         buttons
                     }
                     .padding()
-                    .background(.black.opacity(0.65))
+                    .background(.ultraThinMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
                     .padding()
+                    .padding(.bottom, 20)
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
@@ -52,13 +69,14 @@ struct IMImmersiveHomeView: View {
         .onChange(of: router.shouldResetHomeFlow) { _, triggered in
             if triggered {
                 withAnimation(.easeInOut(duration: 0.25)) {
+                    isCrabOpen = false
                     flow.step = .sleeping
                 }
                 router.shouldResetHomeFlow = false
             }
         }
     }
-
+    
     @ViewBuilder
     private var buttons: some View {
         switch flow.step {
@@ -97,8 +115,7 @@ struct IMImmersiveHomeView: View {
 
 #Preview {
     NavigationStack {
-        IMImmersiveHomeView()
-            .environmentObject(ReportStore())
+        HomeView()
             .environmentObject(AppRouter())
     }
 }

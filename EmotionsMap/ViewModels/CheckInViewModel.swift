@@ -16,6 +16,9 @@ final class CheckInViewModel: ObservableObject {
 
     /// The specific emotion name selected in EmotionDetailView
     @Published var specificEmotion: String? = nil
+    
+    /// Optional manual override for the mood label, bypassing x/y computation
+    @Published var manualMoodLabel: String? = nil
 
     @Published var triggerText: String = ""
     @Published var isTriggerHidden: Bool = false
@@ -23,6 +26,10 @@ final class CheckInViewModel: ObservableObject {
     @Published var audioFileName: String? = nil
 
     var moodLabel: String {
+        if let manual = manualMoodLabel {
+            return manual
+        }
+        
         // mapping semplice (puoi raffinarlo)
         // x: valenza (sx negativo, dx positivo)
         // y: attivazione (giu bassa, su alta)

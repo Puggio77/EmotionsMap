@@ -12,6 +12,7 @@ import SwiftUI
 // MARK: - Route enum
 
 enum AppRoute: Hashable {
+    case mapIsland
     case emotionSpectrum
     case emotionDetail
     case emotionCapture
@@ -44,7 +45,7 @@ final class AppRouter: ObservableObject {
     func startCheckIn() {
         vm = CheckInViewModel()
         subscribeToVM()
-        path.append(AppRoute.emotionSpectrum)
+        path.append(AppRoute.mapIsland)
     }
 
     func openArchive() {
