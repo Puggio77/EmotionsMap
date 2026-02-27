@@ -24,6 +24,9 @@ enum AppRoute: Hashable {
 @MainActor
 final class AppRouter: ObservableObject {
     @Published var path = NavigationPath()
+    @Published var checkInPath = NavigationPath()
+    @Published var checkInPage: Int = 0
+    @Published var isCheckInPresented = false
     @Published var vm = CheckInViewModel()
     @Published var shouldResetHomeFlow = false
 
@@ -45,7 +48,9 @@ final class AppRouter: ObservableObject {
     func startCheckIn() {
         vm = CheckInViewModel()
         subscribeToVM()
-        path.append(AppRoute.mapIsland)
+        checkInPath = NavigationPath()
+        checkInPage = 0
+        isCheckInPresented = true
     }
 
     func openArchive() {
@@ -54,6 +59,9 @@ final class AppRouter: ObservableObject {
 
     func popToRoot() {
         path = NavigationPath()
+        checkInPath = NavigationPath()
+        checkInPage = 0
+        isCheckInPresented = false
         vm = CheckInViewModel()
         subscribeToVM()
         shouldResetHomeFlow = true

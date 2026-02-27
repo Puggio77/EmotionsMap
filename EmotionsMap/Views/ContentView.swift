@@ -15,18 +15,29 @@ struct ContentView: View {
             HomeView()
                 .navigationDestination(for: AppRoute.self) { route in
                     switch route {
-                    case .mapIsland:
-                        EmotionMapIslandView()
-                    case .emotionSpectrum:
-                        EmotionSpectrumView()
-                    case .emotionDetail:
-                        EmotionDetailView()
-                    case .emotionCapture:
-                        EmotionCaptureView()
                     case .archive:
                         PastReflectionsView()
+                    default:
+                        EmptyView()
                     }
                 }
+        }
+        .sheet(isPresented: $router.isCheckInPresented, onDismiss: {
+            router.shouldResetHomeFlow = true
+        }) {
+            TabView(selection: $router.checkInPage) {
+                EmotionMapIslandView()
+                    .tag(0)
+                EmotionDetailView()
+                    .tag(1)
+                EmotionCaptureView()
+                    .tag(2)
+            }
+            .tabViewStyle(.page(indexDisplayMode: .always))
+            .ignoresSafeArea(edges: .bottom)
+            .background(Color(red: 0.45, green: 0.78, blue: 0.72).ignoresSafeArea())
+            .environmentObject(router)
+            .environmentObject(reportStore)
         }
         .environmentObject(reportStore)
         .environmentObject(router)

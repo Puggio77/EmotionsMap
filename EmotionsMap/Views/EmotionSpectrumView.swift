@@ -33,7 +33,7 @@ struct EmotionSpectrumView: View {
             Spacer()
 
             Button {
-                router.path.append(AppRoute.emotionDetail)
+                router.checkInPath.append(AppRoute.emotionDetail)
             } label: {
                 Text("Confirm")
                     .frame(maxWidth: .infinity)

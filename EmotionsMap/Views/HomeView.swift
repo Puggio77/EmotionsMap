@@ -23,7 +23,8 @@ struct HomeView: View {
                 .ignoresSafeArea()
                 .onTapGesture {
                     if !isCrabOpen {
-                        withAnimation(.easeInOut(duration: 0.3)) {
+                        playWakeUpHaptics()
+                        withAnimation(.easeInOut(duration: 0.5)) {
                             isCrabOpen = true
                             flow.wakeUp()
                         }
@@ -34,8 +35,8 @@ struct HomeView: View {
             if flow.step == .sleeping && !isCrabOpen {
                 VStack {
                     Spacer()
-                    Text("Tap the shell to wake up the hermit crab")
-                        .font(.headline)
+                    Text("Tap the shell or shake the phone to wake up the hermit crab")
+                        .font(.subheadline)
                         .padding()
                         .background(.ultraThinMaterial)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -50,7 +51,7 @@ struct HomeView: View {
                     VStack(spacing: 18) {
                         Text(flow.message)
                             .multilineTextAlignment(.center)
-                            .font(.title3)
+                            .font(.callout)
                             .foregroundStyle(.primary)
 
                         buttons
@@ -65,6 +66,15 @@ struct HomeView: View {
             }
         }
         .navigationBarHidden(true)
+        .onShake {
+            if !isCrabOpen {
+                playWakeUpHaptics()
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isCrabOpen = true
+                    flow.wakeUp()
+                }
+            }
+        }
         // Reset flow to sleeping when returning home via router.popToRoot()
         .onChange(of: router.shouldResetHomeFlow) { _, triggered in
             if triggered {
@@ -109,6 +119,17 @@ struct HomeView: View {
 
         default:
             EmptyView()
+        }
+    }
+    
+    private func playWakeUpHaptics() {
+        Task {
+            for _ in 0..<3 {
+                await MainActor.run {
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                }
+                try? await Task.sleep(nanoseconds: 150_000_000)
+            }
         }
     }
 }

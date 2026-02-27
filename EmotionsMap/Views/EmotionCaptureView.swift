@@ -104,7 +104,7 @@ struct EmotionCaptureView: View {
                                 Button {
                                     commitAndSave()
                                 } label: {
-                                    Text("Save & see archive")
+                                    Text("Save")
                                         .frame(maxWidth: .infinity)
                                         .foregroundColor(Color(red: 0.45, green: 0.78, blue: 0.72))
                                 }
@@ -131,6 +131,11 @@ struct EmotionCaptureView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { recorder.requestPermissions() }
         .onDisappear { if recorder.isRecording { recorder.stop() } }
+        .onChange(of: router.checkInPage) { _, newPage in
+            if newPage != 2 && recorder.isRecording {
+                recorder.stop()
+            }
+        }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: captureMode)
         .alert("Microphone Access Required",
                isPresented: $recorder.permissionDenied) {
@@ -152,6 +157,8 @@ struct EmotionCaptureView: View {
             // Record
             Button {
                 withAnimation { captureMode = .audio }
+                recorder.savedFileName = nil
+                recorder.start()
             } label: {
                 VStack(spacing: 12) {
                     ZStack {
@@ -311,7 +318,9 @@ struct EmotionCaptureView: View {
 
         let report = router.vm.buildReport()
         store.add(report)
-        router.path.append(AppRoute.archive)
+        
+        router.isCheckInPresented = false
+        router.shouldResetHomeFlow = true
     }
 }
 

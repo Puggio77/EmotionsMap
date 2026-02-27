@@ -13,7 +13,7 @@ struct EmotionMapIslandView: View {
     var body: some View {
         ZStack {
             // Background representing the ocean
-            Color(red: 0.4, green: 0.8, blue: 0.8).ignoresSafeArea()
+            Color(red: 0.45, green: 0.78, blue: 0.72).ignoresSafeArea()
             
             VStack {
                 Text("Where are you on the island?")
@@ -38,7 +38,7 @@ struct EmotionMapIslandView: View {
                         color: .red
                     ) {
                         router.vm.manualMoodLabel = "Anxious / Tense"
-                        router.path.append(AppRoute.emotionDetail)
+                        withAnimation { router.checkInPage = 1 }
                     }
                     .offset(x: 70, y: -140)
                     
@@ -48,7 +48,7 @@ struct EmotionMapIslandView: View {
                         color: .purple
                     ) {
                         router.vm.manualMoodLabel = "Neutral" // Or map to a new category if needed
-                        router.path.append(AppRoute.emotionDetail)
+                        withAnimation { router.checkInPage = 1 }
                     }
                     .offset(x: -80, y: -110)
                     
@@ -58,7 +58,7 @@ struct EmotionMapIslandView: View {
                         color: Color(red: 0.1, green: 0.3, blue: 0.1)
                     ) {
                         router.vm.manualMoodLabel = "Anxious / Tense"
-                        router.path.append(AppRoute.emotionDetail)
+                        withAnimation { router.checkInPage = 1 }
                     }
                     .offset(x: -70, y: 0)
                     
@@ -68,7 +68,7 @@ struct EmotionMapIslandView: View {
                         color: .blue
                     ) {
                         router.vm.manualMoodLabel = "Sad / Low"
-                        router.path.append(AppRoute.emotionDetail)
+                        withAnimation { router.checkInPage = 1 }
                     }
                     .offset(x: 60, y: 20)
                     
@@ -78,7 +78,7 @@ struct EmotionMapIslandView: View {
                         color: .orange
                     ) {
                         router.vm.manualMoodLabel = "Energetic / Enthusiastic"
-                        router.path.append(AppRoute.emotionDetail)
+                        withAnimation { router.checkInPage = 1 }
                     }
                     .offset(x: 0, y: 100)
                 }

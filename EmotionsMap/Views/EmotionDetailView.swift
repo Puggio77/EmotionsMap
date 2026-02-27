@@ -97,7 +97,7 @@ struct EmotionDetailView: View {
                             .onTapGesture {
                                 // Select and immediately continue
                                 router.vm.specificEmotion = emotion.name
-                                router.path.append(AppRoute.emotionCapture)
+                                withAnimation { router.checkInPage = 2 }
                             }
                         }
                     }
