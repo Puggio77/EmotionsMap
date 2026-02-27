@@ -14,7 +14,7 @@ struct PastReflectionsView: View {
     var body: some View {
         ZStack {
             // Background
-            Color(red: 0.45, green: 0.78, blue: 0.72).ignoresSafeArea()
+            Color(red: 129/255, green: 205/255, blue: 192/255).ignoresSafeArea()
             
             VStack(spacing: 0) {
                 // Header
@@ -66,13 +66,13 @@ struct PastReflectionsView: View {
                     Text("Return Home")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
-                        .foregroundColor(Color(red: 0.45, green: 0.78, blue: 0.72))
+                        .foregroundColor(Color(red: 129/255, green: 205/255, blue: 192/255))
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.white)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)
-                .background(Color(red: 0.45, green: 0.78, blue: 0.72))
+                .background(Color(red: 129/255, green: 205/255, blue: 192/255))
             }
         }
         .navigationBarTitleDisplayMode(.inline)

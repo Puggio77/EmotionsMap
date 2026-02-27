@@ -69,7 +69,7 @@ struct EmotionDetailView: View {
     var body: some View {
         ZStack {
             // Background
-            Color(red: 0.45, green: 0.78, blue: 0.72).ignoresSafeArea()
+            Color(red: 129/255, green: 205/255, blue: 192/255).ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 16) {
                 // Header

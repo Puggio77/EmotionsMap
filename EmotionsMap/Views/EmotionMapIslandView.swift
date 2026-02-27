@@ -13,7 +13,7 @@ struct EmotionMapIslandView: View {
     var body: some View {
         ZStack {
             // Background representing the ocean
-            Color(red: 0.45, green: 0.78, blue: 0.72).ignoresSafeArea()
+            Color(red: 129/255, green: 205/255, blue: 192/255).ignoresSafeArea()
             
             VStack {
                 Text("Where are you on the island?")

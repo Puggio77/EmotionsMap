@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct HomeView: View {
-    @StateObject private var flow = HomeFlowState()
     @EnvironmentObject private var router: AppRouter
     
     // Track whether the crab is open or closed
@@ -26,13 +25,12 @@ struct HomeView: View {
                         playWakeUpHaptics()
                         withAnimation(.easeInOut(duration: 0.5)) {
                             isCrabOpen = true
-                            flow.wakeUp()
                         }
                     }
                 }
             
             // Instruction prompt if sleeping
-            if flow.step == .sleeping && !isCrabOpen {
+            if !isCrabOpen {
                 VStack {
                     Spacer()
                     Text("Tap the shell or shake the phone to wake up the hermit crab")
@@ -45,11 +43,11 @@ struct HomeView: View {
             }
             
             // Interaction UI after crab is open
-            if flow.step != .sleeping && isCrabOpen {
+            if isCrabOpen {
                 VStack {
                     Spacer()
                     VStack(spacing: 18) {
-                        Text(flow.message)
+                        Text("What would you like to do?")
                             .multilineTextAlignment(.center)
                             .font(.callout)
                             .foregroundStyle(.primary)
@@ -71,7 +69,6 @@ struct HomeView: View {
                 playWakeUpHaptics()
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isCrabOpen = true
-                    flow.wakeUp()
                 }
             }
         }
@@ -80,7 +77,6 @@ struct HomeView: View {
             if triggered {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     isCrabOpen = false
-                    flow.step = .sleeping
                 }
                 router.shouldResetHomeFlow = false
             }
@@ -89,36 +85,16 @@ struct HomeView: View {
     
     @ViewBuilder
     private var buttons: some View {
-        switch flow.step {
-
-        case .askFeeling:
-            VStack(spacing: 12) {
-                Button("I'd like to share") {
-                    router.startCheckIn()
-                }
-                .buttonStyle(.borderedProminent)
-
-                Button("Not right now") {
-                    flow.chooseNotNow()
-                }
-                .buttonStyle(.bordered)
+        VStack(spacing: 12) {
+            Button("Register a new emotion") {
+                router.startCheckIn()
             }
+            .buttonStyle(.borderedProminent)
 
-        case .askReflect:
-            VStack(spacing: 12) {
-                Button("Yes, show me") {
-                    router.openArchive()
-                }
-                .buttonStyle(.borderedProminent)
-
-                Button("No, I'd rather share something new") {
-                    router.startCheckIn()
-                }
-                .buttonStyle(.bordered)
+            Button("See past emotions") {
+                router.openArchive()
             }
-
-        default:
-            EmptyView()
+            .buttonStyle(.bordered)
         }
     }
     
