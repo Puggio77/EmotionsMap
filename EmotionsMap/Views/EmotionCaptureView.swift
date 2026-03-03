@@ -8,13 +8,9 @@
 import SwiftUI
 import AVFoundation
 
-// MARK: - Capture mode
-
 private enum CaptureMode {
     case audio, text
 }
-
-// MARK: - View
 
 struct EmotionCaptureView: View {
 
@@ -22,14 +18,16 @@ struct EmotionCaptureView: View {
     @EnvironmentObject private var store: ReportStore
 
     @StateObject private var recorder = VoiceRecorder()
+    @StateObject private var proximityPlayer = ProximityAudioPlayer()
 
     @State private var captureMode: CaptureMode? = nil
     @State private var noteText: String = ""
 
-    // Derived from router.vm (set by EmotionDetailView)
+    @FocusState private var isTextFocused: Bool
+
     private var emotionName: String  { router.vm.specificEmotion ?? router.vm.moodLabel }
     private var quadrantName: String { router.vm.moodLabel }
-    
+
     private var shellName: String {
         let index = abs(emotionName.hashValue) % 5 + 1
         return "shell_\(index)"
@@ -44,93 +42,150 @@ struct EmotionCaptureView: View {
     }
 
     var body: some View {
-        ZStack {
-            // Background
-            Color(red: 0.45, green: 0.78, blue: 0.72).ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // Header
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("reflect on your moment")
-                        .font(.title2.weight(.bold))
-                        .foregroundColor(.white)
-                    Text("it's you and the shell, remember forever\nwhat are your feelings")
-                        .font(.headline.weight(.medium))
-                        .foregroundColor(.white)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 24)
-                .padding(.top, 20)
-                
-                ScrollView {
-                    VStack(spacing: 30) {
-                        // Shell & Emotion labels
-                        VStack(spacing: 20) {
+        GeometryReader { geo in
+            let h = geo.size.height
+
+            // Dimensioni adattive per evitare scroll
+            let headerTop: CGFloat = max(10, min(20, h * 0.025))
+            let headerSpacing: CGFloat = max(6, min(10, h * 0.012))
+            let contentSpacing: CGFloat = max(14, min(22, h * 0.025))
+
+            // “Hero” (quadrato shell) adattivo
+            let shellBox: CGFloat = min(200, max(140, h * 0.22))
+            let shellImg: CGFloat = shellBox * 0.72
+
+            // TextEditor altezza adattiva quando in modalità testo
+            let textEditorMin: CGFloat = max(120, min(180, h * 0.20))
+
+            ZStack {
+                Color(red: 129/255, green: 205/255, blue: 192/255)
+                    .ignoresSafeArea()
+
+                VStack(spacing: 0) {
+
+                    // HEADER
+                    VStack(alignment: .leading, spacing: headerSpacing) {
+                        Text("reflect on your moment")
+                            .font(.title2.weight(.bold))
+                            .foregroundColor(.white)
+
+                        Text("it's you and the shell, remember forever\nwhat are your feelings")
+                            .font(.headline.weight(.medium))
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.9)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 24)
+                    .padding(.top, headerTop)
+
+                    // CONTENUTO (senza scroll)
+                    VStack(spacing: contentSpacing) {
+
+                        // Shell + labels
+                        VStack(spacing: max(10, contentSpacing * 0.7)) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                    .fill(Color(red: 0.3, green: 0.3, blue: 0.3)) // Dark grey square like in mockup
-                                    .frame(width: 200, height: 200)
+                                    .fill(Color(red: 0.3, green: 0.3, blue: 0.3))
+                                    .frame(width: shellBox, height: shellBox)
                                     .shadow(color: .black.opacity(0.15), radius: 10, y: 5)
-                                
+
                                 Image(shellName)
                                     .resizable()
                                     .scaledToFit()
-                                    .frame(width: 150, height: 150)
+                                    .frame(width: shellImg, height: shellImg)
                             }
-                            
-                            VStack(alignment: .center, spacing: 4) {
+
+                            VStack(spacing: 4) {
                                 Text(emotionName.lowercased())
                                     .font(.title2.weight(.bold))
                                     .foregroundColor(.white)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.85)
+
                                 Text(quadrantName.lowercased())
                                     .font(.headline.weight(.medium))
                                     .foregroundColor(.white)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.85)
                             }
                         }
-                        .padding(.top, 40)
-                        
-                        // Mode Choice or Active Panel
-                        if captureMode == nil {
-                            modeChoice
-                        } else if captureMode == .audio {
-                            audioPanel
-                        } else {
-                            textPanel
-                        }
-                        
-                        // Save Panel
-                        if captureMode != nil {
-                            VStack(spacing: 12) {
-                                Button {
-                                    commitAndSave()
-                                } label: {
-                                    Text("Save & see archive")
-                                        .frame(maxWidth: .infinity)
-                                        .foregroundColor(Color(red: 0.45, green: 0.78, blue: 0.72))
-                                }
-                                .buttonStyle(.borderedProminent)
-                                .tint(.white)
-                                .disabled(!canSave)
+                        .padding(.top, max(8, h * 0.015))
 
-                                Button("Change method") {
-                                    if recorder.isRecording { recorder.stop() }
-                                    withAnimation { captureMode = nil }
-                                }
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(.white)
+                        // Panel (mode choice / audio / text)
+                        Group {
+                            if captureMode == nil {
+                                modeChoice
+                            } else if captureMode == .audio {
+                                audioPanel
+                            } else {
+                                textPanel(textEditorMinHeight: textEditorMin)
                             }
-                            .padding(.horizontal, 24)
-                            .padding(.top, 20)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
                         }
+                        .frame(maxWidth: .infinity)
+
+                        Spacer(minLength: 0)
                     }
-                    .padding(.bottom, 40)
+                    .padding(.top, max(10, h * 0.015))
+
+                    // SAVE PANEL (sempre dentro al modal, pinned in basso)
+                    if captureMode != nil {
+                        VStack(spacing: 12) {
+                            Button {
+                                commitAndSave()
+                            } label: {
+                                Text("Save")
+                                    .frame(maxWidth: .infinity)
+                                    .foregroundColor(Color(red: 129/255, green: 205/255, blue: 192/255))
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.white)
+                            .disabled(!canSave)
+
+                            Button("Change method") {
+                                if recorder.isRecording { recorder.stop() }
+                                // se stavi scrivendo, chiude anche la tastiera
+                                isTextFocused = false
+                                withAnimation { captureMode = nil }
+                            }
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.white)
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 16)
+                        .background(
+                            Color(red: 129/255, green: 205/255, blue: 192/255)
+                                .ignoresSafeArea(edges: .bottom)
+                        )
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
                 }
             }
+            // Tap fuori per chiudere tastiera (senza rompere bottoni)
+            .contentShape(Rectangle())
+            .simultaneousGesture(
+                TapGesture().onEnded { isTextFocused = false }
+            )
         }
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { recorder.requestPermissions() }
-        .onDisappear { if recorder.isRecording { recorder.stop() } }
+        .onDisappear {
+            if recorder.isRecording { recorder.stop() }
+            proximityPlayer.deactivate()
+        }
+        .onChange(of: router.checkInPage) { _, newPage in
+            if newPage != 2 {
+                if recorder.isRecording { recorder.stop() }
+                proximityPlayer.deactivate()
+            }
+        }
+        .onChange(of: recorder.savedFileName) { _, newFile in
+            if let file = newFile {
+                proximityPlayer.activate(fileName: file)
+            } else {
+                proximityPlayer.deactivate()
+            }
+        }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: captureMode)
         .alert("Microphone Access Required",
                isPresented: $recorder.permissionDenied) {
@@ -145,13 +200,13 @@ struct EmotionCaptureView: View {
         }
     }
 
-    // MARK: – Mode choice
-
+    // MARK: – Mode choice (uguale)
     private var modeChoice: some View {
         HStack(spacing: 50) {
-            // Record
             Button {
                 withAnimation { captureMode = .audio }
+                recorder.savedFileName = nil
+                recorder.start()
             } label: {
                 VStack(spacing: 12) {
                     ZStack {
@@ -160,7 +215,7 @@ struct EmotionCaptureView: View {
                             .frame(width: 90, height: 90)
                         Image(systemName: "play.fill")
                             .font(.system(size: 30))
-                            .foregroundColor(Color(red: 0.1, green: 0.4, blue: 0.9)) // blue icon
+                            .foregroundColor(Color(red: 0.1, green: 0.4, blue: 0.9))
                     }
                     Text("record\nby voice")
                         .font(.headline.weight(.medium))
@@ -170,9 +225,12 @@ struct EmotionCaptureView: View {
             }
             .buttonStyle(.plain)
 
-            // Write
             Button {
                 withAnimation { captureMode = .text }
+                // apre subito la tastiera
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    isTextFocused = true
+                }
             } label: {
                 VStack(spacing: 12) {
                     ZStack {
@@ -181,7 +239,7 @@ struct EmotionCaptureView: View {
                             .frame(width: 90, height: 90)
                         Image(systemName: "pencil")
                             .font(.system(size: 30))
-                            .foregroundColor(Color(red: 0.1, green: 0.4, blue: 0.9)) // blue icon
+                            .foregroundColor(Color(red: 0.1, green: 0.4, blue: 0.9))
                     }
                     Text("start\nwriting")
                         .font(.headline.weight(.medium))
@@ -192,22 +250,18 @@ struct EmotionCaptureView: View {
             .buttonStyle(.plain)
         }
         .transition(.opacity.combined(with: .scale(scale: 0.96)))
-        .padding(.top, 20)
+        .padding(.top, 6)
     }
 
-    // MARK: – Audio panel
-
+    // MARK: – Audio panel (uguale)
     private var audioPanel: some View {
         VStack(spacing: 20) {
-
-            // Status
             Text(recorder.isRecording
                  ? "Recording — \(recorder.formattedDuration)"
                  : recorder.savedFileName != nil ? "Recording saved ✓" : "Tap the mic to start")
                 .font(.headline.weight(.semibold))
                 .foregroundStyle(recorder.isRecording ? .red : .white)
 
-            // Mic button
             Button {
                 if recorder.isRecording {
                     recorder.stop()
@@ -241,7 +295,6 @@ struct EmotionCaptureView: View {
             }
             .buttonStyle(.plain)
 
-            // Saved row
             if let _ = recorder.savedFileName {
                 HStack(spacing: 10) {
                     Image(systemName: "waveform")
@@ -262,19 +315,29 @@ struct EmotionCaptureView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .padding(.horizontal, 24)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+
+                // Proximity ear-playback hint
+                Label(
+                    proximityPlayer.isPlaying ? "Playing through earpiece…" : "Bring phone to ear to listen",
+                    systemImage: proximityPlayer.isPlaying ? "ear.fill" : "ear"
+                )
+                .font(.system(.caption, design: .rounded, weight: .medium))
+                .foregroundStyle(.white.opacity(0.75))
+                .padding(.horizontal, 24)
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.3), value: proximityPlayer.isPlaying)
             }
 
             if let err = recorder.errorMessage {
                 Text(err).font(.caption).foregroundStyle(.red)
             }
         }
-        .padding(.top, 20)
+        .padding(.top, 6)
         .transition(.opacity.combined(with: .move(edge: .bottom)))
     }
 
-    // MARK: – Text panel
-
-    private var textPanel: some View {
+    // MARK: – Text panel (solo focus + altezza adattiva)
+    private func textPanel(textEditorMinHeight: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("What's on your mind?")
                 .font(.headline.weight(.bold))
@@ -282,19 +345,25 @@ struct EmotionCaptureView: View {
                 .padding(.horizontal, 24)
 
             TextEditor(text: $noteText)
-                .frame(minHeight: 180)
+                .focused($isTextFocused)
+                .frame(minHeight: textEditorMinHeight)
                 .padding(12)
                 .background(Color.white.opacity(0.9))
                 .cornerRadius(16)
                 .padding(.horizontal, 24)
                 .scrollContentBackground(.hidden)
+                .toolbar {
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") { isTextFocused = false }
+                    }
+                }
         }
-        .padding(.top, 20)
+        .padding(.top, 6)
         .transition(.opacity.combined(with: .move(edge: .bottom)))
     }
 
-    // MARK: – Save
-
+    // MARK: – Save (uguale)
     private func commitAndSave() {
         if recorder.isRecording { recorder.stop() }
 
@@ -311,7 +380,9 @@ struct EmotionCaptureView: View {
 
         let report = router.vm.buildReport()
         store.add(report)
-        router.path.append(AppRoute.archive)
+
+        router.isCheckInPresented = false
+        router.shouldResetHomeFlow = true
     }
 }
 
