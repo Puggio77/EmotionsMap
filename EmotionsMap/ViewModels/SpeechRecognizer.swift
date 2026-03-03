@@ -2,12 +2,16 @@
 //  VoiceRecorder.swift
 //  EmotionsMap
 //
-//  Created by Riccardo Puggioni on 23/02/26.
+//  Note: VoicePlayer → VoicePlayer.swift
+//        ProximityAudioPlayer → ProximityAudioPlayer.swift
 //
 
 import Foundation
 import Combine
 import AVFoundation
+import UIKit
+
+// MARK: - Voice Recorder
 
 @MainActor
 final class VoiceRecorder: NSObject, ObservableObject {
@@ -16,7 +20,7 @@ final class VoiceRecorder: NSObject, ObservableObject {
 
     @Published var isRecording: Bool = false
     @Published var elapsedSeconds: Int = 0
-    @Published var savedFileName: String? = nil   // set after stop()
+    @Published var savedFileName: String? = nil
     @Published var permissionDenied: Bool = false
     @Published var errorMessage: String? = nil
 
@@ -67,9 +71,7 @@ final class VoiceRecorder: NSObject, ObservableObject {
 
             timer = Timer.publish(every: 1, on: .main, in: .common)
                 .autoconnect()
-                .sink { [weak self] _ in
-                    self?.elapsedSeconds += 1
-                }
+                .sink { [weak self] _ in self?.elapsedSeconds += 1 }
         } catch {
             errorMessage = "Could not start recording: \(error.localizedDescription)"
         }
@@ -81,7 +83,6 @@ final class VoiceRecorder: NSObject, ObservableObject {
         timer = nil
         isRecording = false
         savedFileName = currentFileName
-
         try? AVAudioSession.sharedInstance().setActive(false)
     }
 
@@ -117,45 +118,6 @@ extension VoiceRecorder: AVAudioRecorderDelegate {
                 self.errorMessage = "Recording failed."
                 self.savedFileName = nil
             }
-        }
-    }
-}
-
-// MARK: - Player helper
-
-@MainActor
-final class VoicePlayer: ObservableObject {
-    @Published var isPlaying: Bool = false
-    @Published var errorMessage: String? = nil
-
-    private var player: AVAudioPlayer?
-
-    func toggle(fileName: String) {
-        if isPlaying {
-            player?.stop()
-            isPlaying = false
-        } else {
-            play(fileName: fileName)
-        }
-    }
-
-    private func play(fileName: String) {
-        let url = VoiceRecorder.documentsURL(for: fileName)
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback)
-            try AVAudioSession.sharedInstance().setActive(true)
-            player = try AVAudioPlayer(contentsOf: url)
-            player?.play()
-            isPlaying = true
-
-            // Track completion via a simple polling approach
-            let duration = player?.duration ?? 0
-            Task {
-                try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
-                self.isPlaying = false
-            }
-        } catch {
-            errorMessage = "Could not play audio: \(error.localizedDescription)"
         }
     }
 }

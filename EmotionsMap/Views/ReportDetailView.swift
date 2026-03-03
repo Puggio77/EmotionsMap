@@ -10,6 +10,7 @@ import SwiftUI
 struct ReportDetailView: View {
     let report: MoodReport
     @StateObject private var player = VoicePlayer()
+    @StateObject private var proximityPlayer = ProximityAudioPlayer()
 
     var body: some View {
         ScrollView {
@@ -41,6 +42,7 @@ struct ReportDetailView: View {
                         Label("Voice memo", systemImage: "waveform")
                             .font(.headline)
 
+                        // Manual speaker playback
                         Button {
                             player.toggle(fileName: audioFileName)
                         } label: {
@@ -61,6 +63,15 @@ struct ReportDetailView: View {
                         }
                         .buttonStyle(.plain)
 
+                        // Ear-playback hint
+                        Label(
+                            proximityPlayer.isPlaying ? "Playing through earpiece…" : "Bring phone to ear to listen",
+                            systemImage: proximityPlayer.isPlaying ? "ear.fill" : "ear"
+                        )
+                        .font(.system(.caption, design: .rounded, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .animation(.easeInOut(duration: 0.25), value: proximityPlayer.isPlaying)
+
                         if let err = player.errorMessage {
                             Text(err)
                                 .font(.caption)
@@ -71,6 +82,8 @@ struct ReportDetailView: View {
                     .padding()
                     .background(.thinMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .onAppear  { proximityPlayer.activate(fileName: audioFileName) }
+                    .onDisappear { proximityPlayer.deactivate() }
                 }
 
                 // ── Written note ─────────────────────────────────────

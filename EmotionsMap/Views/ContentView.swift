@@ -23,24 +23,53 @@ struct ContentView: View {
                 }
         }
         .sheet(isPresented: $router.isCheckInPresented, onDismiss: {
+            router.checkInPage = 0
             router.shouldResetHomeFlow = true
         }) {
-            TabView(selection: $router.checkInPage) {
-                EmotionMapIslandView()
-                    .tag(0)
-                EmotionDetailView()
-                    .tag(1)
-                EmotionCaptureView()
-                    .tag(2)
-            }
-            .tabViewStyle(.page(indexDisplayMode: .always))
-            .ignoresSafeArea(edges: .bottom)
-            .background(Color(red: 0.45, green: 0.78, blue: 0.72).ignoresSafeArea())
-            .environmentObject(router)
-            .environmentObject(reportStore)
+            CheckInFlowView()
+                .environmentObject(router)
+                .environmentObject(reportStore)
         }
         .environmentObject(reportStore)
         .environmentObject(router)
+    }
+}
+
+// MARK: - Locked check-in flow
+
+/// Hosts the three check-in pages inside a plain ZStack.
+/// Pages advance only when the user completes the required action on each screen.
+/// There is no swipe gesture — navigation is fully programmatic.
+private struct CheckInFlowView: View {
+    @EnvironmentObject private var router: AppRouter
+
+    var body: some View {
+        ZStack {
+            switch router.checkInPage {
+            case 0:
+                EmotionMapIslandView()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal:   .move(edge: .leading)
+                    ))
+            case 1:
+                EmotionDetailView()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal:   .move(edge: .leading)
+                    ))
+            case 2:
+                EmotionCaptureView()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing),
+                        removal:   .move(edge: .leading)
+                    ))
+            default:
+                EmptyView()
+            }
+        }
+        .animation(.spring(response: 0.45, dampingFraction: 0.8), value: router.checkInPage)
+        .background(Color(red: 0.45, green: 0.78, blue: 0.72).ignoresSafeArea())
     }
 }
 

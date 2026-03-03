@@ -18,6 +18,7 @@ struct EmotionCaptureView: View {
     @EnvironmentObject private var store: ReportStore
 
     @StateObject private var recorder = VoiceRecorder()
+    @StateObject private var proximityPlayer = ProximityAudioPlayer()
 
     @State private var captureMode: CaptureMode? = nil
     @State private var noteText: String = ""
@@ -43,7 +44,6 @@ struct EmotionCaptureView: View {
     var body: some View {
         GeometryReader { geo in
             let h = geo.size.height
-            let w = geo.size.width
 
             // Dimensioni adattive per evitare scroll
             let headerTop: CGFloat = max(10, min(20, h * 0.025))
@@ -169,10 +169,21 @@ struct EmotionCaptureView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { recorder.requestPermissions() }
-        .onDisappear { if recorder.isRecording { recorder.stop() } }
+        .onDisappear {
+            if recorder.isRecording { recorder.stop() }
+            proximityPlayer.deactivate()
+        }
         .onChange(of: router.checkInPage) { _, newPage in
-            if newPage != 2 && recorder.isRecording {
-                recorder.stop()
+            if newPage != 2 {
+                if recorder.isRecording { recorder.stop() }
+                proximityPlayer.deactivate()
+            }
+        }
+        .onChange(of: recorder.savedFileName) { _, newFile in
+            if let file = newFile {
+                proximityPlayer.activate(fileName: file)
+            } else {
+                proximityPlayer.deactivate()
             }
         }
         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: captureMode)
@@ -304,6 +315,17 @@ struct EmotionCaptureView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .padding(.horizontal, 24)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+
+                // Proximity ear-playback hint
+                Label(
+                    proximityPlayer.isPlaying ? "Playing through earpiece…" : "Bring phone to ear to listen",
+                    systemImage: proximityPlayer.isPlaying ? "ear.fill" : "ear"
+                )
+                .font(.system(.caption, design: .rounded, weight: .medium))
+                .foregroundStyle(.white.opacity(0.75))
+                .padding(.horizontal, 24)
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.3), value: proximityPlayer.isPlaying)
             }
 
             if let err = recorder.errorMessage {

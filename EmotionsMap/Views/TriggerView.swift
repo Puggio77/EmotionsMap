@@ -86,15 +86,14 @@ struct TriggerView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(!canSave)
 
-                NavigationLink("", isActive: $goToArchive) {
-                    PastReflectionsView()
-                }
-                .hidden()
             }
             .padding()
         }
         .navigationTitle("Describe it")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(isPresented: $goToArchive) {
+            PastReflectionsView()
+        }
         .onAppear { recorder.requestPermissions() }
         .onDisappear { if recorder.isRecording { recorder.stop() } }
         .alert("Microphone Access Required",
