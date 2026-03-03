@@ -24,7 +24,7 @@ struct EmotionDetailView: View {
     private var currentIsRevealed: Bool { revealed.contains(currentIndex) }
 
     private var emotions: [SpecificEmotionItem] {
-        emotionData[router.vm.moodLabel] ?? []
+        SpecificEmotionItem.items(for: router.vm.basicEmotion)
     }
 
     var body: some View {
