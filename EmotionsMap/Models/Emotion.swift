@@ -8,27 +8,25 @@
 import Foundation
 import SwiftData
 
-// First layer of Plutchik’s Wheel of Emotions
+// Core emotions based on the Junto Emotion Wheel
 enum BasicEmotion: String, Codable, CaseIterable, Identifiable {
-    
-    case happy = "Happy"
-    case sad = "Sad"
+
+    case joy       = "Joy"
+    case sadness   = "Sadness"
     case disgusted = "Disgusted"
-    case angry = "Angry"
-    case fearful = "Fearful"
-    case bad = "Bad"
-    case surprised = "Surprised"
-    
+    case anger     = "Anger"
+    case fear      = "Fear"
+    case surprise  = "Surprise"
+
     var id: Self { self }
     var hexColor: String {
         switch self {
-        case .happy:     return "F9C74F" // Warm yellow
-        case .sad:       return "4A90D9" // Muted blue
+        case .joy:       return "F9C74F" // Warm yellow
+        case .sadness:   return "4A90D9" // Muted blue
         case .disgusted: return "6BAB6E" // Murky green
-        case .angry:     return "E63946" // Bold red
-        case .fearful:   return "9B5DE5" // Deep purple
-        case .bad:       return "F4845F" // Dull orange
-        case .surprised: return "F7B2BD" // Soft pink
+        case .anger:     return "E63946" // Bold red
+        case .fear:      return "F4845F" // Dull orange
+        case .surprise:  return "9B5DE5" // Deep purple
         }
     }
 }
@@ -43,7 +41,7 @@ class SubEmotion {
     @Relationship(deleteRule: .cascade)
     var specificEmotions: [SpecificEmotion]?
     
-    init(name: String = "Accepted", basicEmotion: BasicEmotion = .happy) {
+    init(name: String = "Happy", basicEmotion: BasicEmotion = .joy) {
         self.name = name
         self.basicEmotion = basicEmotion
     }
@@ -55,10 +53,12 @@ class SpecificEmotion {
     var name: String
     var shellType: String
     var basicEmotion: BasicEmotion
-    
-    init(name: String = "Respected", shellType: String = "None", basicEmotion: BasicEmotion = .happy) {
+    var emotionDescription: String
+
+    init(name: String = "Hopeful", shellType: String = "None", basicEmotion: BasicEmotion = .joy, emotionDescription: String = "") {
         self.name = name
         self.shellType = shellType
         self.basicEmotion = basicEmotion
+        self.emotionDescription = emotionDescription
     }
 }

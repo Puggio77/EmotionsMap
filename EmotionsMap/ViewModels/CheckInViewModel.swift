@@ -25,6 +25,16 @@ final class CheckInViewModel: ObservableObject {
     /// Filename of a saved voice memo, if the user chose to record
     @Published var audioFileName: String? = nil
 
+    var basicEmotion: BasicEmotion {
+        switch moodLabel {
+        case "Anxious / Tense":          return .fear
+        case "Energetic / Enthusiastic": return .joy
+        case "Sad / Low":                return .sadness
+        case "Calm / Relaxed":           return .joy
+        default:                         return .surprise
+        }
+    }
+
     var moodLabel: String {
         if let manual = manualMoodLabel {
             return manual
