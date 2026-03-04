@@ -9,71 +9,63 @@ import SwiftUI
 
 struct PastReflectionsView: View {
     @EnvironmentObject private var store: ReportStore
+
+
+    private var sortedReports: [MoodReport] {
+        store.reports.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
+
+=======
     @EnvironmentObject private var router: AppRouter
     @State private var showHelpLines = false
     
+
     var body: some View {
         ZStack {
-            // Background
             Color(red: 129/255, green: 205/255, blue: 192/255).ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // Header
-                VStack(spacing: 8) {
-                    Text("your past feelings")
-                        .font(.title2.weight(.bold))
-                        .foregroundColor(.white)
-                    Text("here is a safe space with all the shells\nyou collected")
-                        .font(.headline.weight(.medium))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
+
+            if sortedReports.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "tray")
+                        .font(.system(size: 50))
+                        .foregroundColor(.white.opacity(0.8))
+                    Text("you have not collected any shells yet")
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.8))
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 20)
-                .padding(.bottom, 20)
-                
-                if store.reports.isEmpty {
-                    Spacer()
-                    VStack(spacing: 16) {
-                        Image(systemName: "tray")
-                            .font(.system(size: 50))
-                            .foregroundColor(.white.opacity(0.8))
-                        Text("you have not collected any shells yet")
-                            .font(.headline)
-                            .foregroundColor(.white.opacity(0.8))
-                    }
-                    Spacer()
-                } else {
-                    ScrollView {
-                        VStack(spacing: 16) {
-                            ForEach(store.reports) { report in
+            } else {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        // Header
+                        VStack(spacing: 8) {
+                            Text("your past feelings")
+                                .font(.title2.weight(.bold))
+                                .foregroundColor(.white)
+                            Text("here is a safe space with all the shells\nyou collected")
+                                .font(.headline.weight(.medium))
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.center)
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.top, 20)
+                        .padding(.bottom, 20)
+
+                        LazyVGrid(columns: columns, spacing: 12) {
+                            ForEach(sortedReports) { report in
                                 NavigationLink {
                                     ReportDetailView(report: report)
                                 } label: {
-                                    ReflectionRow(report: report)
+                                    ShellGridCell(report: report)
                                 }
                                 .buttonStyle(.plain)
                             }
                         }
-                        .padding(.horizontal, 24)
+                        .padding(.horizontal, 16)
                         .padding(.bottom, 20)
-                     }
+                    }
                 }
-                
-                // Return Home Button
-                Button {
-                    router.popToRoot()
-                } label: {
-                    Text("Return Home")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .foregroundColor(Color(red: 129/255, green: 205/255, blue: 192/255))
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
-                .background(Color(red: 129/255, green: 205/255, blue: 192/255))
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -93,51 +85,45 @@ struct PastReflectionsView: View {
     }
 }
 
-// MARK: - Reflection Row
-private struct ReflectionRow: View {
+// MARK: - Grid Cell
+
+private struct ShellGridCell: View {
     let report: MoodReport
-    
-    // Deterministic random shell based on emotion ID
+
     private var shellName: String {
         let name = report.specificEmotion ?? report.moodLabel
         let index = abs(name.hashValue) % 5 + 1
         return "shell_\(index)"
     }
-    
+
+    private static let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "dd/MM/yyyy"
+        return f
+    }()
+
     var body: some View {
-        HStack(spacing: 16) {
-            // Shell icon with square background
-            ZStack {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color.white.opacity(0.25))
-                    .frame(width: 80, height: 80)
-                    .shadow(color: .black.opacity(0.1), radius: 5, y: 3)
-                
-                Image(shellName)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 60, height: 60)
-            }
-            
-            // Texts
-            VStack(alignment: .leading, spacing: 6) {
-                Text(report.moodLabel.lowercased())
-                    .font(.title3.weight(.bold))
-                    .foregroundColor(.white)
-                
-                if let specific = report.specificEmotion {
-                    Text(specific.lowercased())
-                        .font(.subheadline.weight(.medium))
-                        .foregroundColor(.white.opacity(0.95))
-                }
-                
-                Text(report.createdAt.formatted(date: .abbreviated, time: .shortened).lowercased())
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.75))
-            }
-            
-            Spacer(minLength: 0)
+        VStack(spacing: 6) {
+            ColoredShell(
+                shellName: shellName,
+                color: Color(report.basicEmotion.hexColor)
+            )
+            .scaledToFit()
+            .aspectRatio(1, contentMode: .fit)
+
+            Text((report.specificEmotion ?? report.moodLabel).lowercased())
+                .font(.caption.weight(.semibold))
+                .foregroundColor(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+
+            Text(Self.dateFormatter.string(from: report.createdAt))
+                .font(.caption2)
+                .foregroundColor(.white.opacity(0.75))
         }
+        .padding(8)
+        .background(Color.white.opacity(0.15))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
