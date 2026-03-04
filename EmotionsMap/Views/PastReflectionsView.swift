@@ -10,11 +10,17 @@ import SwiftUI
 struct PastReflectionsView: View {
     @EnvironmentObject private var store: ReportStore
 
+
     private var sortedReports: [MoodReport] {
         store.reports.sorted { $0.createdAt > $1.createdAt }
     }
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
+
+=======
+    @EnvironmentObject private var router: AppRouter
+    @State private var showHelpLines = false
+    
 
     var body: some View {
         ZStack {
@@ -63,6 +69,19 @@ struct PastReflectionsView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    showHelpLines = true
+                } label: {
+                    Image(systemName: "sos.circle.fill")
+                        .foregroundStyle(.red)
+                }
+            }
+        }
+        .sheet(isPresented: $showHelpLines) {
+            HelpLinesView()
+        }
     }
 }
 
