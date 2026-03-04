@@ -15,7 +15,8 @@ struct EmotionsMapApp: App {
         let schema = Schema([
             SubEmotion.self,
             SpecificEmotion.self,
-            Trigger.self
+            Trigger.self,
+            MoodReport.self
         ])
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {

@@ -6,17 +6,17 @@
 //
 
 import Foundation
-import SwiftUI
+import SwiftData
 
-struct MoodReport: Identifiable, Codable, Equatable {
-    let id: UUID
-    let createdAt: Date
+@Model
+final class MoodReport {
+    var id: UUID
+    var createdAt: Date
 
     // 0...1
     var x: Double
     var y: Double
 
-    // derived / saved for convenience
     var moodLabel: String
 
     /// The specific emotion picked in EmotionDetailView (e.g. "Peaceful")
@@ -24,10 +24,11 @@ struct MoodReport: Identifiable, Codable, Equatable {
 
     var triggerText: String
     var isTriggerHidden: Bool
+
     /// Filename (not full path) of the recorded voice memo, if any
     var audioFileName: String?
 
-    /// Derived from `moodLabel` — not stored, safe for Codable
+    /// Derived from `moodLabel` — computed, not persisted by SwiftData
     var basicEmotion: BasicEmotion {
         switch moodLabel {
         case "Anxious / Tense":          return .fear
