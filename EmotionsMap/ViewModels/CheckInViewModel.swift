@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 @MainActor
 final class CheckInViewModel: ObservableObject {
@@ -67,5 +68,23 @@ final class CheckInViewModel: ObservableObject {
     var canSave: Bool {
         // consentiamo anche trigger vuoto, ma almeno emozione selezionata sempre ok
         true
+    }
+
+    /// How strongly the emotion is felt (0 = neutral center, 1 = maximum intensity)
+    var emotionIntensity: Double {
+        let dx = x - 0.5
+        let dy = y - 0.5
+        return min(1.0, sqrt(dx * dx + dy * dy) / 0.5)
+    }
+
+    /// Color representing the current emotional quadrant
+    var quadrantColor: Color {
+        switch moodLabel {
+        case "Anxious / Tense":          return .red
+        case "Energetic / Enthusiastic": return .orange
+        case "Sad / Low":                return .blue
+        case "Calm / Relaxed":           return Color(red: 0.2, green: 0.75, blue: 0.45)
+        default:                         return .purple
+        }
     }
 }
