@@ -7,9 +7,10 @@
 
 import SwiftUI
 import AVFoundation
+import SwiftData
 
 struct TriggerView: View {
-    @EnvironmentObject private var store: ReportStore
+    
     @ObservedObject var vm: CheckInViewModel
     @Environment(\.dismiss) private var dismiss
 
@@ -77,7 +78,6 @@ struct TriggerView: View {
                         vm.triggerText = ""
                     }
                     let report = vm.buildReport()
-                    store.add(report)
                     goToArchive = true
                 } label: {
                     Text("Save & see archive")
@@ -204,6 +204,6 @@ struct TriggerView: View {
 #Preview {
     NavigationStack {
         TriggerView(vm: CheckInViewModel())
-            .environmentObject(ReportStore())
+            
     }
 }

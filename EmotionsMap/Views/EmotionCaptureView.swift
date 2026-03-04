@@ -7,6 +7,8 @@
 
 import SwiftUI
 import AVFoundation
+import SwiftData
+
 
 private enum CaptureMode {
     case audio, text
@@ -15,7 +17,7 @@ private enum CaptureMode {
 struct EmotionCaptureView: View {
 
     @EnvironmentObject private var router: AppRouter
-    @EnvironmentObject private var store: ReportStore
+    @Environment(\.modelContext) private var modelContext
 
     @StateObject private var recorder = VoiceRecorder()
     @StateObject private var proximityPlayer = ProximityAudioPlayer()
@@ -381,7 +383,8 @@ struct EmotionCaptureView: View {
         }
 
         let report = router.vm.buildReport()
-        store.add(report)
+        modelContext.insert(report)
+        try? modelContext.save()
 
         router.isCheckInPresented = false
         router.shouldResetHomeFlow = true
@@ -399,6 +402,6 @@ struct EmotionCaptureView: View {
                 r.vm.x = 0.7; r.vm.y = 0.3
                 return r
             }())
-            .environmentObject(ReportStore())
+            .modelContainer(for: MoodReport.self, inMemory: true)
     }
 }

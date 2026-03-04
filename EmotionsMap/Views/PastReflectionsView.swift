@@ -6,27 +6,21 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct PastReflectionsView: View {
-    @EnvironmentObject private var store: ReportStore
-
-
-    private var sortedReports: [MoodReport] {
-        store.reports.sorted { $0.createdAt > $1.createdAt }
-    }
+    @Query(sort: \MoodReport.createdAt, order: .reverse) private var reports: [MoodReport]
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
 
-=======
     @EnvironmentObject private var router: AppRouter
     @State private var showHelpLines = false
-    
 
     var body: some View {
         ZStack {
             Color(red: 129/255, green: 205/255, blue: 192/255).ignoresSafeArea()
 
-            if sortedReports.isEmpty {
+            if reports.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "tray")
                         .font(.system(size: 50))
@@ -53,7 +47,7 @@ struct PastReflectionsView: View {
                         .padding(.bottom, 20)
 
                         LazyVGrid(columns: columns, spacing: 12) {
-                            ForEach(sortedReports) { report in
+                            ForEach(reports) { report in
                                 NavigationLink {
                                     ReportDetailView(report: report)
                                 } label: {
@@ -130,7 +124,7 @@ private struct ShellGridCell: View {
 #Preview {
     NavigationStack {
         PastReflectionsView()
-            .environmentObject(ReportStore())
             .environmentObject(AppRouter())
+            .modelContainer(for: MoodReport.self, inMemory: true)
     }
 }

@@ -7,7 +7,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var reportStore = ReportStore()
     @StateObject private var router = AppRouter()
 
     var body: some View {
@@ -28,9 +27,7 @@ struct ContentView: View {
         }) {
             CheckInFlowView()
                 .environmentObject(router)
-                .environmentObject(reportStore)
         }
-        .environmentObject(reportStore)
         .environmentObject(router)
     }
 }
