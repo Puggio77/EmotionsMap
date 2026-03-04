@@ -28,7 +28,7 @@ struct EmotionsMapApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(container: container)
             .modelContainer(container)
             .task {
                 await MainActor.run {

@@ -5,11 +5,34 @@
 //  Created by Riccardo Puggioni on 17/02/26.
 //
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    let container: ModelContainer
+
+    @StateObject private var reportStore: ReportStore
     @StateObject private var router = AppRouter()
 
+    init(container: ModelContainer) {
+        self.container = container
+        _reportStore = StateObject(wrappedValue: ReportStore(modelContext: container.mainContext))
+    }
+    
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+
     var body: some View {
+        Group {
+            if hasSeenOnboarding {
+                mainAppFlow
+            } else {
+                OnboardingView()
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut, value: hasSeenOnboarding)
+    }
+    
+    private var mainAppFlow: some View {
         NavigationStack(path: $router.path) {
             HomeView()
                 .navigationDestination(for: AppRoute.self) { route in
@@ -27,7 +50,9 @@ struct ContentView: View {
         }) {
             CheckInFlowView()
                 .environmentObject(router)
+                .environmentObject(reportStore)
         }
+        .environmentObject(reportStore)
         .environmentObject(router)
     }
 }
@@ -71,5 +96,7 @@ private struct CheckInFlowView: View {
 }
 
 #Preview {
-    ContentView()
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: MoodReport.self, configurations: config)
+    return ContentView(container: container)
 }
