@@ -10,6 +10,7 @@ import SwiftUI
 struct PastReflectionsView: View {
     @EnvironmentObject private var store: ReportStore
     @EnvironmentObject private var router: AppRouter
+    @State private var showHelpLines = false
     
     var body: some View {
         ZStack {
@@ -76,6 +77,19 @@ struct PastReflectionsView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    showHelpLines = true
+                } label: {
+                    Image(systemName: "sos.circle.fill")
+                        .foregroundStyle(.red)
+                }
+            }
+        }
+        .sheet(isPresented: $showHelpLines) {
+            HelpLinesView()
+        }
     }
 }
 
