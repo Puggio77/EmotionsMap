@@ -39,7 +39,7 @@ struct EmotionCaptureView: View {
         switch captureMode {
         case .audio: return recorder.savedFileName != nil
         case .text:  return !noteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        case nil:    return false
+        case nil:    return true   // user can save without any reflection
         }
     }
 
@@ -133,36 +133,35 @@ struct EmotionCaptureView: View {
                     .padding(.top, max(10, h * 0.015))
 
                     // SAVE PANEL (sempre dentro al modal, pinned in basso)
-                    if captureMode != nil {
-                        VStack(spacing: 12) {
-                            Button {
-                                commitAndSave()
-                            } label: {
-                                Text("Save")
-                                    .frame(maxWidth: .infinity)
-                                    .foregroundColor(Color(red: 129/255, green: 205/255, blue: 192/255))
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .tint(.white)
-                            .disabled(!canSave)
+                    VStack(spacing: 12) {
+                        Button {
+                            commitAndSave()
+                        } label: {
+                            Text("Save")
+                                .frame(maxWidth: .infinity)
+                                .foregroundColor(Color(red: 129/255, green: 205/255, blue: 192/255))
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.white)
+                        .disabled(!canSave)
 
+                        if captureMode != nil {
                             Button("Change method") {
                                 if recorder.isRecording { recorder.stop() }
-                                // se stavi scrivendo, chiude anche la tastiera
                                 isTextFocused = false
                                 withAnimation { captureMode = nil }
                             }
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(.white)
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.vertical, 16)
-                        .background(
-                            Color(red: 129/255, green: 205/255, blue: 192/255)
-                                .ignoresSafeArea(edges: .bottom)
-                        )
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 16)
+                    .background(
+                        Color(red: 129/255, green: 205/255, blue: 192/255)
+                            .ignoresSafeArea(edges: .bottom)
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
             // Tap fuori per chiudere tastiera (senza rompere bottoni)
@@ -217,7 +216,7 @@ struct EmotionCaptureView: View {
                         Circle()
                             .fill(Color(red: 0.35, green: 0.68, blue: 0.62))
                             .frame(width: 90, height: 90)
-                        Image(systemName: "play.fill")
+                        Image(systemName: "record.circle")
                             .font(.system(size: 30))
                             .foregroundColor(Color(red: 0.1, green: 0.4, blue: 0.9))
                     }
@@ -350,6 +349,8 @@ struct EmotionCaptureView: View {
 
             TextEditor(text: $noteText)
                 .focused($isTextFocused)
+                .foregroundColor(.black)
+                .tint(.black)
                 .frame(minHeight: textEditorMinHeight)
                 .padding(12)
                 .background(Color.white.opacity(0.9))

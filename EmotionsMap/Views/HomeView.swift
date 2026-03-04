@@ -61,7 +61,7 @@ struct HomeView: View {
 
                 // ── BOTTOM: Sleeping hint or action buttons ──
                 if !isCrabOpen {
-                    Label("Tap Hermie to wake him up", systemImage: "hand.tap.fill")
+                    Label("Tap on Hermie or shake the phone to wake him up", systemImage: "hand.tap.fill")
                         .font(.system(.subheadline, design: .rounded, weight: .medium))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 20)
