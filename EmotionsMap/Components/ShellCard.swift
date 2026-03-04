@@ -11,6 +11,7 @@ struct ShellCard: View {
     let emotion: SpecificEmotionItem
     let isRevealed: Bool
     let cardWidth: CGFloat
+    let color: Color
     let onTap: () -> Void
 
     private var shellName: String {
@@ -31,8 +32,7 @@ struct ShellCard: View {
 
             VStack(spacing: 24) {
                 // Shell image — bounces on reveal
-                Image(shellName)
-                    .resizable()
+                ColoredShell(shellName: shellName, color: color)
                     .scaledToFit()
                     .frame(width: cardWidth * 0.62, height: cardWidth * 0.62)
                     .scaleEffect(isRevealed ? 1.08 : 1.0)

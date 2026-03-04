@@ -90,10 +90,12 @@ struct EmotionCaptureView: View {
                                     .frame(width: shellBox, height: shellBox)
                                     .shadow(color: .black.opacity(0.15), radius: 10, y: 5)
 
-                                Image(shellName)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: shellImg, height: shellImg)
+                                ColoredShell(
+                                    shellName: shellName,
+                                    color: Color(router.vm.basicEmotion.hexColor)
+                                )
+                                .scaledToFit()
+                                .frame(width: shellImg, height: shellImg)
                             }
 
                             VStack(spacing: 4) {

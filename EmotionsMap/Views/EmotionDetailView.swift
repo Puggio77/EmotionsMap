@@ -60,7 +60,8 @@ struct EmotionDetailView: View {
                                 ShellCard(
                                     emotion: emotion,
                                     isRevealed: revealed.contains(index),
-                                    cardWidth: cardWidth
+                                    cardWidth: cardWidth,
+                                    color: Color(router.vm.basicEmotion.hexColor)
                                 ) {
                                     tapShell(at: index)
                                 }
