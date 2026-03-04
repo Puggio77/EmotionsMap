@@ -9,18 +9,25 @@ import SwiftUI
 import SwiftData
 
 struct PastReflectionsView: View {
-    @Query(sort: \MoodReport.createdAt, order: .reverse) private var reports: [MoodReport]
+    @EnvironmentObject private var store: ReportStore
+
+
+    private var sortedReports: [MoodReport] {
+        store.reports.sorted { $0.createdAt > $1.createdAt }
+    }
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
 
+
     @EnvironmentObject private var router: AppRouter
     @State private var showHelpLines = false
+    
 
     var body: some View {
         ZStack {
             Color(red: 129/255, green: 205/255, blue: 192/255).ignoresSafeArea()
 
-            if reports.isEmpty {
+            if sortedReports.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "tray")
                         .font(.system(size: 50))
@@ -47,7 +54,7 @@ struct PastReflectionsView: View {
                         .padding(.bottom, 20)
 
                         LazyVGrid(columns: columns, spacing: 12) {
-                            ForEach(reports) { report in
+                            ForEach(sortedReports) { report in
                                 NavigationLink {
                                     ReportDetailView(report: report)
                                 } label: {
@@ -62,6 +69,7 @@ struct PastReflectionsView: View {
                 }
             }
         }
+        .onAppear { store.refresh() }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -122,9 +130,11 @@ private struct ShellGridCell: View {
 }
 
 #Preview {
-    NavigationStack {
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: MoodReport.self, configurations: config)
+    return NavigationStack {
         PastReflectionsView()
+            .environmentObject(ReportStore(modelContext: container.mainContext))
             .environmentObject(AppRouter())
-            .modelContainer(for: MoodReport.self, inMemory: true)
     }
 }
