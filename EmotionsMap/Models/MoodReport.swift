@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct MoodReport: Identifiable, Codable, Equatable {
     let id: UUID
@@ -25,6 +26,17 @@ struct MoodReport: Identifiable, Codable, Equatable {
     var isTriggerHidden: Bool
     /// Filename (not full path) of the recorded voice memo, if any
     var audioFileName: String?
+
+    /// Derived from `moodLabel` — not stored, safe for Codable
+    var basicEmotion: BasicEmotion {
+        switch moodLabel {
+        case "Anxious / Tense":          return .fear
+        case "Energetic / Enthusiastic": return .joy
+        case "Sad / Low":                return .sadness
+        case "Calm / Relaxed":           return .joy
+        default:                         return .surprise
+        }
+    }
 
     init(id: UUID = UUID(),
          createdAt: Date = Date(),
