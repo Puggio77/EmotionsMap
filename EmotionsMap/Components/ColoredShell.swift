@@ -22,17 +22,22 @@ struct ColoredShell: View {
 
     var body: some View {
         ZStack {
-            // Layer 1: flat emotion color fill
+            // Layer 1: emotion color fill, shaped to the shell silhouette
             Image(shapeName)
                 .resizable()
                 .renderingMode(.template)
                 .foregroundColor(color)
 
-            // Layer 2: texture/outline — white areas become transparent via multiply
+            // Layer 2: grayscale shell texture — luminosity blend takes the
+            // shading/luminance from the gray image and the hue+saturation
+            // from the color layer beneath. drawingGroup() is required so the
+            // two layers composite against each other in an offscreen pass
+            // rather than against the whole scene background.
             Image(shellName)
                 .resizable()
-                .blendMode(.multiply)
+                .blendMode(.luminosity)
         }
+        .drawingGroup()
     }
 }
 
