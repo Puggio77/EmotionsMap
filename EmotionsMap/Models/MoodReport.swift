@@ -30,13 +30,7 @@ final class MoodReport {
 
     /// Derived from `moodLabel` — computed, not persisted by SwiftData
     var basicEmotion: BasicEmotion {
-        switch moodLabel {
-        case "Anxious / Tense":          return .fear
-        case "Energetic / Enthusiastic": return .joy
-        case "Sad / Low":                return .sadness
-        case "Calm / Relaxed":           return .joy
-        default:                         return .surprise
-        }
+        BasicEmotion.allCases.first { $0.locationName == moodLabel } ?? .surprise
     }
 
     init(id: UUID = UUID(),
