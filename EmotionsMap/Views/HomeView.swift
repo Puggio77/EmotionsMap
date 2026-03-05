@@ -8,13 +8,21 @@
 
 import SwiftUI
 
+// MARK: - Crab state
+
+private enum CrabState {
+    case closed       // HermitCrabSoloClosed — waiting
+    case animating    // HermieAnimation sprite sheet playing once
+    case open         // HermitCrabSoloOpen — fully awake
+}
+
 // MARK: - HomeView
 
 struct HomeView: View {
     @EnvironmentObject private var router: AppRouter
 
-    @State private var isCrabOpen = false
-    @State private var dialogueStep = -1     // -1 = not started
+    @State private var crabState: CrabState = .closed
+    @State private var dialogueStep = -1
     @State private var showButtons = false
 
     private let dialogLines = [
@@ -25,21 +33,27 @@ struct HomeView: View {
     var body: some View {
         ZStack {
 
-            // ── Fullscreen crab background ──
-            Image(isCrabOpen ? "HermitCarbIslandOpen" : "HermitCrabIslandClosed")
+            // ── Layer 1: Island background ──
+            Image("Island")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
-                .animation(.easeInOut(duration: 0.5), value: isCrabOpen)
+
+            // ── Layer 2: Crab — always centred, independent of UI ──
+            // Frame: 2466/6 × 1890/6 = 411 × 315 → at width 280, height ≈ 215
+            crabView
+                .id(crabState)
+                .frame(width: 280, height: 280 * 315 / 411)
                 .onTapGesture {
-                    handleCrabTap()
+                    guard crabState == .closed else { return }
+                    wakeUpCrab()
                 }
 
-            // ── Main overlay: bubbles top, buttons bottom ──
-            VStack {
+            // ── Layer 3: UI — speech bubbles top, buttons/hint bottom ──
+            VStack(spacing: 0) {
 
-                // ── TOP: Speech bubbles ──
-                if isCrabOpen && dialogueStep >= 0 {
+                // TOP: Speech bubbles
+                if crabState == .open && dialogueStep >= 0 {
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(0...min(dialogueStep, dialogLines.count - 1), id: \.self) { idx in
                             SpeechBubble(text: dialogLines[idx])
@@ -59,8 +73,8 @@ struct HomeView: View {
 
                 Spacer()
 
-                // ── BOTTOM: Sleeping hint or action buttons ──
-                if !isCrabOpen {
+                // BOTTOM: hint label or action buttons
+                if crabState == .closed {
                     Label("Tap on Hermie or shake the phone to wake him up", systemImage: "hand.tap.fill")
                         .font(.system(.subheadline, design: .rounded, weight: .medium))
                         .foregroundStyle(.white)
@@ -71,7 +85,7 @@ struct HomeView: View {
                         .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
 
-                if isCrabOpen && showButtons {
+                if crabState == .open && showButtons {
                     VStack(spacing: 12) {
                         Button {
                             router.startCheckIn()
@@ -105,36 +119,74 @@ struct HomeView: View {
         }
         .navigationBarHidden(true)
         .onShake {
-            if !isCrabOpen { wakeUpCrab() }
+            guard crabState == .closed else { return }
+            wakeUpCrab()
         }
         .onChange(of: router.shouldResetHomeFlow) { _, triggered in
             if triggered {
                 withAnimation(.easeInOut(duration: 0.3)) {
-                    isCrabOpen = false
+                    crabState    = .closed
                     dialogueStep = -1
-                    showButtons = false
+                    showButtons  = false
                 }
                 router.shouldResetHomeFlow = false
             }
         }
     }
 
-    // MARK: - Logic
+    // MARK: - Crab view
 
-    private func handleCrabTap() {
-        if !isCrabOpen {
-            wakeUpCrab()
-        } else if !showButtons {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                showButtons = true
+    // HermieAnimation grid: 6 cols × 6 rows = 36 frames (indices 0–35)
+    private let spriteRows = 6
+    private let spriteCols = 6
+    private var lastFrame: Int { spriteRows * spriteCols - 1 }  // 35
+
+    @ViewBuilder
+    private var crabView: some View {
+        switch crabState {
+        case .closed:
+            // First frame of the sprite sheet
+            SpriteAnimationView(
+                imageName: "HermieAnimation",
+                rows: spriteRows, cols: spriteCols,
+                startFrame: 0
+            )
+
+        case .animating:
+            // Play all frames once, then transition to open
+            SpriteAnimationView(
+                imageName: "HermieAnimation",
+                rows: spriteRows, cols: spriteCols,
+                fps: 12,
+                startFrame: 0,
+                playAnimation: true
+            ) {
+                transitionToOpen()
             }
+
+        case .open:
+            // Last frame of the sprite sheet
+            SpriteAnimationView(
+                imageName: "HermieAnimation",
+                rows: spriteRows, cols: spriteCols,
+                startFrame: lastFrame
+            )
         }
     }
 
+    // MARK: - Logic
+
     private func wakeUpCrab() {
         playWakeUpHaptics()
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
-            isCrabOpen = true
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            crabState = .animating
+        }
+    }
+
+    /// Called by SpriteAnimationView when the last frame is reached
+    private func transitionToOpen() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            crabState = .open
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) {
