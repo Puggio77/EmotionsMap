@@ -357,12 +357,8 @@ struct EmotionCaptureView: View {
                 .cornerRadius(16)
                 .padding(.horizontal, 24)
                 .scrollContentBackground(.hidden)
-                .toolbar {
-                    ToolbarItemGroup(placement: .keyboard) {
-                        Spacer()
-                        Button("Done") { isTextFocused = false }
-                    }
-                }
+                .submitLabel(.done)
+                .onSubmit { isTextFocused = false }
         }
         .padding(.top, 6)
         .transition(.opacity.combined(with: .move(edge: .bottom)))

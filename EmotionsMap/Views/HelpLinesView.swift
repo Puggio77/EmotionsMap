@@ -88,29 +88,55 @@ struct HelpLinesView: View {
     
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(regions) { region in
-                    Section(header: Text(region.name)) {
-                        ForEach(region.lines) { line in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(line.country)
-                                    .font(.headline)
-                                Text(line.numbers)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
+            ZStack {
+                // Sea background
+                Color(red: 129/255, green: 205/255, blue: 192/255)
+                    .ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 24) {
+                        ForEach(regions) { region in
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text(region.name)
+                                    .font(.title3.weight(.bold))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+
+                                VStack(spacing: 12) {
+                                    ForEach(region.lines) { line in
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(line.country)
+                                                .font(.headline)
+                                                .foregroundColor(.white)
+                                            Text(line.numbers)
+                                                .font(.subheadline)
+                                                .foregroundColor(.white.opacity(0.8))
+                                                .fixedSize(horizontal: false, vertical: true)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding()
+                                        .background(Color.black.opacity(0.15))
+                                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                    }
+                                }
                             }
-                            .padding(.vertical, 4)
                         }
                     }
+                    .padding(24)
                 }
             }
             .navigationTitle("Psychological Help")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Color(red: 129/255, green: 205/255, blue: 192/255), for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         dismiss()
                     }
+                    .foregroundColor(.white)
+                    .fontWeight(.semibold)
                 }
             }
         }

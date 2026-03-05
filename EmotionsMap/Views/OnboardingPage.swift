@@ -22,7 +22,7 @@ struct OnboardingView: View {
         OnboardingPage(
             title: "Welcome to EmotionsMap",
             description: "A safe space to understand and track how you feel every day.",
-            imageName: "hermit_crab_closed"
+            imageName: "HermitCrabSoloOpen"
         ),
         OnboardingPage(
             title: "Explore the Island",
@@ -140,7 +140,7 @@ struct OnboardingPageView: View {
             Image(page.imageName.isEmpty ? "hermit_crab_open" : page.imageName)
                 .resizable()
                 .scaledToFit()
-                .frame(maxHeight: 250)
+                .frame(maxHeight: 350) // Increased from 250 to make the crab/images larger
                 .padding()
             
             VStack(spacing: 12) {

@@ -26,7 +26,7 @@ struct HomeView: View {
         ZStack {
 
             // ── Fullscreen crab background ──
-            Image(isCrabOpen ? "hermit_crab_open" : "hermit_crab_closed")
+            Image(isCrabOpen ? "HermitCarbIslandOpen" : "HermitCrabIslandClosed")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
