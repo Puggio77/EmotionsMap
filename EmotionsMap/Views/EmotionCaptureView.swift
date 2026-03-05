@@ -96,6 +96,7 @@ struct EmotionCaptureView: View {
                                     shellName: shellName,
                                     color: Color(router.vm.basicEmotion.hexColor)
                                 )
+                                .saturation(0.2 + 0.8 * router.vm.emotionIntensity)
                                 .scaledToFit()
                                 .frame(width: shellImg, height: shellImg)
                             }
@@ -390,15 +391,3 @@ struct EmotionCaptureView: View {
 
 // MARK: – Preview
 
-#Preview {
-    NavigationStack {
-        EmotionCaptureView()
-            .environmentObject({
-                let r = AppRouter()
-                r.vm.specificEmotion = "Peaceful"
-                r.vm.x = 0.7; r.vm.y = 0.3
-                return r
-            }())
-            .modelContainer(for: MoodReport.self, inMemory: true)
-    }
-}

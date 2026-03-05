@@ -2,8 +2,6 @@
 //  CheckInViewModel.swift
 //  EmotionsMap
 //
-//  Created by Riccardo Puggioni on 17/02/26.
-//
 
 import Foundation
 import Combine
@@ -11,47 +9,42 @@ import SwiftUI
 
 @MainActor
 final class CheckInViewModel: ObservableObject {
-    // emotion point (0...1)
-    @Published var x: Double = 0.5
-    @Published var y: Double = 0.5
 
-    /// The specific emotion name selected in EmotionDetailView
+    /// Angle of the dragged pin in degrees. 0 = north/top, increases clockwise.
+    @Published var pinAngle: Double = 0
+
+    /// How intensely the emotion is felt: 0 = center (mild), 1 = edge (intense).
+    @Published var pinIntensity: Double = 0
+
+    /// The specific emotion name selected in EmotionDetailView (e.g. "Hopeful")
     @Published var specificEmotion: String? = nil
-    
-    /// Optional manual override for the mood label, bypassing x/y computation
-    @Published var manualMoodLabel: String? = nil
 
     @Published var triggerText: String = ""
     @Published var isTriggerHidden: Bool = false
-    /// Filename of a saved voice memo, if the user chose to record
+
+    /// Filename (not full path) of a saved voice memo, if the user chose to record
     @Published var audioFileName: String? = nil
 
+    // MARK: – Derived
+
+    /// Which basic emotion the current pin angle maps to
     var basicEmotion: BasicEmotion {
-        switch moodLabel {
-        case "Anxious / Tense":          return .fear
-        case "Energetic / Enthusiastic": return .joy
-        case "Sad / Low":                return .sadness
-        case "Calm / Relaxed":           return .joy
-        default:                         return .surprise
-        }
+        BasicEmotion.from(angle: pinAngle)
     }
 
-    var moodLabel: String {
-        if let manual = manualMoodLabel {
-            return manual
-        }
-        
-        // mapping semplice (puoi raffinarlo)
-        // x: valenza (sx negativo, dx positivo)
-        // y: attivazione (giu bassa, su alta)
-        switch (x, y) {
-        case (0.0..<0.45, 0.55...1.0): return "Anxious / Tense"
-        case (0.55...1.0, 0.55...1.0): return "Energetic / Enthusiastic"
-        case (0.0..<0.45, 0.0..<0.45): return "Sad / Low"
-        case (0.55...1.0, 0.0..<0.45): return "Calm / Relaxed"
-        default: return "Neutral"
-        }
-    }
+    /// Island location name for the current emotion (used as moodLabel in reports)
+    var moodLabel: String { basicEmotion.locationName }
+
+    /// Intensity as a 0–1 value (alias exposed for consumers)
+    var emotionIntensity: Double { pinIntensity }
+
+    /// Cartesian x coordinate (0.5 = centre), preserved for MoodReport
+    var x: Double { 0.5 + pinIntensity * 0.5 * sin(pinAngle * .pi / 180) }
+
+    /// Cartesian y coordinate (0.5 = centre), preserved for MoodReport
+    var y: Double { 0.5 - pinIntensity * 0.5 * cos(pinAngle * .pi / 180) }
+
+    // MARK: – Actions
 
     func buildReport() -> MoodReport {
         MoodReport(
@@ -65,26 +58,5 @@ final class CheckInViewModel: ObservableObject {
         )
     }
 
-    var canSave: Bool {
-        // consentiamo anche trigger vuoto, ma almeno emozione selezionata sempre ok
-        true
-    }
-
-    /// How strongly the emotion is felt (0 = neutral center, 1 = maximum intensity)
-    var emotionIntensity: Double {
-        let dx = x - 0.5
-        let dy = y - 0.5
-        return min(1.0, sqrt(dx * dx + dy * dy) / 0.5)
-    }
-
-    /// Color representing the current emotional quadrant
-    var quadrantColor: Color {
-        switch moodLabel {
-        case "Anxious / Tense":          return .red
-        case "Energetic / Enthusiastic": return .orange
-        case "Sad / Low":                return .blue
-        case "Calm / Relaxed":           return Color(red: 0.2, green: 0.75, blue: 0.45)
-        default:                         return .purple
-        }
-    }
+    var canSave: Bool { true }
 }

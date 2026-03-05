@@ -48,7 +48,8 @@ struct EmotionDetailView: View {
                                         emotion: emotion,
                                         isRevealed: revealedEmotions.contains(emotion.name),
                                         isSelected: selectedEmotion == emotion,
-                                        color: Color(router.vm.basicEmotion.hexColor)
+                                        color: Color(router.vm.basicEmotion.hexColor),
+                                        intensity: router.vm.emotionIntensity
                                     )
                                     .position(
                                         x: CGFloat(tile) * Self.tileWidth + basePos.x,
@@ -168,10 +169,12 @@ struct ShellView: View {
     let isRevealed: Bool
     let isSelected: Bool
     let color: Color
+    let intensity: Double  // 0–1: maps to shell color saturation
 
     var body: some View {
         VStack(spacing: 4) {
             ColoredShell(shellName: emotion.shellName, color: color)
+                .saturation(0.2 + 0.8 * intensity)
                 .frame(width: 80, height: 80)
                 .shadow(
                     color: isSelected ? color.opacity(0.75) : .black.opacity(0.25),
@@ -261,17 +264,6 @@ extension SpecificEmotionItem {
         let hash = abs(name.hashValue)
         let index = (hash % shellCount) + 1
         return "shell_\(index)"
-    }
-}
-
-#Preview {
-    NavigationStack {
-        EmotionDetailView()
-            .environmentObject({
-                let r = AppRouter()
-                r.vm.manualMoodLabel = "Surprised / Amazed"
-                return r
-            }())
     }
 }
 

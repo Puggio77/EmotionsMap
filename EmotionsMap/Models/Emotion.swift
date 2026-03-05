@@ -29,6 +29,38 @@ enum BasicEmotion: String, Codable, CaseIterable, Identifiable {
         case .surprise:  return "9B5DE5" // Deep purple
         }
     }
+
+    /// The island location name shown in the UI
+    var locationName: String {
+        switch self {
+        case .joy:       return "Beach of Joy"
+        case .sadness:   return "Lake of Sadness"
+        case .disgusted: return "Cave of Disgust"
+        case .anger:     return "Volcano of Anger"
+        case .fear:      return "Forest of Fear"
+        case .surprise:  return "Garden of Surprise"
+        }
+    }
+
+    /// Center angle of this emotion's circle sector (0 = north/top, clockwise)
+    var sectorAngle: Double {
+        switch self {
+        case .joy:       return 0
+        case .disgusted: return 60
+        case .sadness:   return 120
+        case .anger:     return 180
+        case .fear:      return 240
+        case .surprise:  return 300
+        }
+    }
+
+    /// Returns the emotion whose sector contains the given angle.
+    /// - Parameter angle: degrees, 0 = north/top, increases clockwise
+    static func from(angle: Double) -> BasicEmotion {
+        let ordered: [BasicEmotion] = [.joy, .disgusted, .sadness, .anger, .fear, .surprise]
+        let idx = Int(((angle + 30).truncatingRemainder(dividingBy: 360)) / 60) % 6
+        return ordered[max(0, min(5, idx))]
+    }
 }
 
 // Second layer of Plutchik’s Wheel of Emotions
