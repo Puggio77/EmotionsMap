@@ -27,7 +27,7 @@ struct OnboardingView: View {
         OnboardingPage(
             title: "Explore the Island",
             description: "Navigate through your emotional landscape and discover the depth of your feelings.",
-            imageName: "island map"
+            imageName: "IslandMap"
         ),
         OnboardingPage(
             title: "Reflect and Save",
@@ -39,7 +39,7 @@ struct OnboardingView: View {
     var body: some View {
         ZStack {
             // Background matching the app's soothing theme
-            Color(red: 129/255, green: 205/255, blue: 192/255)
+            Color(red: 155/255, green: 206/255, blue: 221/255)
                 .ignoresSafeArea()
             
             VStack {

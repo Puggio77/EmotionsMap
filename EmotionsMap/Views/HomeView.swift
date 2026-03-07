@@ -24,10 +24,38 @@ struct HomeView: View {
     @State private var crabState: CrabState = .closed
     @State private var dialogueStep = -1
     @State private var showButtons = false
+    @State private var dialogLines: [String] = []
 
-    private let dialogLines = [
-        "Hey there! 🦀\nI'm Hermie, your emotional guide!",
-        "How are you feeling today?\nWant to explore your emotions?"
+    /// Pool of greeting pairs. A random pair is chosen every time Hermie wakes up.
+    private let dialogPool: [[String]] = [
+        [
+            "Hey there! 🦀\nI'm Hermie, your emotional guide!",
+            "How are you feeling today?\nWant to explore your emotions?"
+        ],
+        [
+            "Hello again! 🌊\nReady to check in with yourself?",
+            "Your feelings matter — let's capture them together!"
+        ],
+        [
+            "Oh, you're back! 🐚\nI've missed you!",
+            "What's going on inside today?\nLet's find out!"
+        ],
+        [
+            "Good to see you! ☀️\nHow's your emotional weather today?",
+            "Sunny, cloudy, or a bit stormy?\nLet's explore it!"
+        ],
+        [
+            "Welcome! 🌴\nYour island is waiting for you.",
+            "Every feeling deserves a shell.\nShall we start?"
+        ],
+        [
+            "Hey! 🦀 Did you know emotions are like waves?\nThey come and go.",
+            "Let's ride yours together today!"
+        ],
+        [
+            "*yawns* 🐚 Good morning… or evening?\nEither way, I'm here!",
+            "What emotion would you like to map today?"
+        ]
     ]
 
     var body: some View {
@@ -77,10 +105,12 @@ struct HomeView: View {
                 if crabState == .closed {
                     Label("Tap on Hermie or shake the phone to wake him up", systemImage: "hand.tap.fill")
                         .font(.system(.subheadline, design: .rounded, weight: .medium))
+                        .multilineTextAlignment(.center)
                         .foregroundStyle(.white)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 12)
                         .background(.ultraThinMaterial, in: Capsule())
+                        .padding(.horizontal, 50)
                         .padding(.bottom, 50)
                         .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
@@ -112,7 +142,7 @@ struct HomeView: View {
                     .padding(20)
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 10)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
@@ -178,6 +208,9 @@ struct HomeView: View {
 
     private func wakeUpCrab() {
         playWakeUpHaptics()
+        if let randomDialog = dialogPool.randomElement() {
+            dialogLines = randomDialog
+        }
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             crabState = .animating
         }

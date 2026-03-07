@@ -91,7 +91,7 @@ private struct CheckInFlowView: View {
             }
         }
         .animation(.spring(response: 0.45, dampingFraction: 0.8), value: router.checkInPage)
-        .background(Color(red: 0.45, green: 0.78, blue: 0.72).ignoresSafeArea())
+        .background(Color(red: 155/255, green: 206/255, blue: 221/255).ignoresSafeArea())
     }
 }
 

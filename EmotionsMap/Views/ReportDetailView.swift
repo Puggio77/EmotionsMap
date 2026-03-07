@@ -38,7 +38,7 @@ struct ReportDetailView: View {
     var body: some View {
         ZStack {
             // Sea background color matching the app
-            Color(red: 129/255, green: 205/255, blue: 192/255)
+            Color(red: 155/255, green: 206/255, blue: 221/255)
                 .ignoresSafeArea()
             
             ScrollView {
@@ -156,13 +156,13 @@ struct ReportDetailView: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 40)
             }
-            .background(Color(red: 129/255, green: 205/255, blue: 192/255).ignoresSafeArea())
+            .background(Color(red: 155/255, green: 206/255, blue: 221/255).ignoresSafeArea())
             .navigationTitle("Detail")
             .navigationBarTitleDisplayMode(.inline)
             // Ensure standard back button and title color works with the teal background
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarBackground(Color(red: 129/255, green: 205/255, blue: 192/255), for: .navigationBar)
+            .toolbarBackground(Color(red: 155/255, green: 206/255, blue: 221/255), for: .navigationBar)
         }
     }
 }

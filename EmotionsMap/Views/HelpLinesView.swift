@@ -90,7 +90,7 @@ struct HelpLinesView: View {
         NavigationStack {
             ZStack {
                 // Sea background
-                Color(red: 129/255, green: 205/255, blue: 192/255)
+                Color(red: 155/255, green: 206/255, blue: 221/255)
                     .ignoresSafeArea()
 
                 ScrollView {
@@ -129,7 +129,7 @@ struct HelpLinesView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarBackground(Color(red: 129/255, green: 205/255, blue: 192/255), for: .navigationBar)
+            .toolbarBackground(Color(red: 155/255, green: 206/255, blue: 221/255), for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
